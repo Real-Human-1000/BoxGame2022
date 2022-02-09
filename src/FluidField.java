@@ -40,7 +40,7 @@ public class FluidField {
         N = h;
 
         t = 0;
-        for(int i=0; i<w; i++){
+        for (int i=0; i<w; i++) {
             for(int j=0; j<h; j++) {
 //                if (i!=0 && j!=0 && i!=w-1 && j!=h-1) {
 //                    density[IX(i,j)] = Math.random();

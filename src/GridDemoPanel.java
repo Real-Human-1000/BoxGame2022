@@ -211,8 +211,6 @@ public class GridDemoPanel extends JPanel implements MouseListener, KeyListener
 					break;
 				}
 			}
-			
 		}
-		
 	}
 }
