@@ -261,7 +261,18 @@ public class FluidField {
     public void setVy(int i, int j, double v){ vy[IX(i,j)]=v; }
 
     public void addSource(int x, int y, double density, double vx, double vy){
-        sources.add(new WaterSource(x,y,density,vx,vy));
+        boolean found = false;
+        for(int i=0; i<sources.size(); i++) {
+            if (sources.get(i).getX() == x && sources.get(i).getY() == y) {
+                sources.get(i).setDensity(density);
+                sources.get(i).setVx(vx);
+                sources.get(i).setVy(vy);
+                found = true;
+            }
+        }
+        if (!found) {
+            sources.add(new WaterSource(x, y, density, vx, vy));
+        }
     }
     public WaterSource getSource(int i){ return sources.get(i); }
     public ArrayList<WaterSource> getSources(){ return sources; }
