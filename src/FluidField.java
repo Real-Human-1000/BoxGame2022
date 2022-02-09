@@ -1,5 +1,6 @@
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
+import java.util.ArrayList;
 
 public class FluidField {
     private double[] density;
@@ -22,9 +23,11 @@ public class FluidField {
 
     private double t;
 
+    private ArrayList<WaterSource> sources;
+
 //    private boolean mdown = false;
 //    private boolean state0 = false;
-    public FluidField(int h, int w){
+    public FluidField(int w, int h){
         density=new double[h*w];
         vx=new double[h*w];
         vy=new double[h*w];
@@ -40,7 +43,8 @@ public class FluidField {
         N = h;
 
         t = 0;
-        for (int i=0; i<w; i++) {
+        sources = new ArrayList<>();
+        for(int i=0; i<w; i++){
             for(int j=0; j<h; j++) {
 //                if (i!=0 && j!=0 && i!=w-1 && j!=h-1) {
 //                    density[IX(i,j)] = Math.random();
@@ -66,18 +70,12 @@ public class FluidField {
     public void step(){
         vel_step ( N, vy, vx, vy0, vx0, visc, dt );
         dens_step ( N, density, density0, vy, vx, diff, dt );
-        for(int i=0; i<h*w; i++) {
-            if (i%h< h && i%h>= 0 && i/h<2) {
-                t+=0.001;
-                if (t>=360)t=0;
-                //density[i] = Math.abs(Math.cos(Math.toRadians(t)));
-                density[i] = Math.random();
-                vx[i] = (5*Math.cos(Math.toRadians(t*2))*Math.random());
-                vy[i] = Math.random()-0.5;
-            }
-            if (i/h>w-4){
-                density[i]=0;
-            }
+        for (int i=0; i<sources.size(); i++){
+            int x = sources.get(i).getX();
+            int y = sources.get(i).getY();
+            density[IX(x,y)]=sources.get(i).getDensity();
+            vx[IX(x,y)]=sources.get(i).getVx();
+            vy[IX(x,y)]=sources.get(i).getVy();
         }
     }
 
@@ -243,15 +241,49 @@ public class FluidField {
     public int getH() {
         return h;
     }
-
     public int getW() {
         return w;
     }
 
-    public double[] getDensity(){ return density; }
-    public double[] getVx(){ return vx; }
-    public double[] getVy(){ return vy; }
+    public double[] getDensityArr(){ return density; }
+    public double[] getVxArr(){ return vx; }
+    public double[] getVyArr(){ return vy; }
     public Boolean[] getWalls(){ return walls; }
+
+    public Boolean getWall(int i, int j){ return walls[IX(i,j)]; }
+    public double getDensity(int i, int j){ return density[IX(i,j)]; }
+    public double getVx(int i, int j){ return vx[IX(i,j)]; }
+    public double getVy(int i, int j){ return vy[IX(i,j)]; }
+
+    public void setWall(int i, int j, boolean b){ walls[IX(i,j)]=b; }
+    public void setDensity(int i, int j, double d){ density[IX(i,j)]=d; }
+    public void setVx(int i, int j, double v){ vx[IX(i,j)]=v; }
+    public void setVy(int i, int j, double v){ vy[IX(i,j)]=v; }
+
+    public void addSource(int x, int y, double density, double vx, double vy){
+        boolean found = false;
+        for(int i=0; i<sources.size(); i++) {
+            if (sources.get(i).getX() == x && sources.get(i).getY() == y) {
+                sources.get(i).setDensity(density);
+                sources.get(i).setVx(vx);
+                sources.get(i).setVy(vy);
+                found = true;
+            }
+        }
+        if (!found) {
+            sources.add(new WaterSource(x, y, density, vx, vy));
+        }
+    }
+    public WaterSource getSource(int i){ return sources.get(i); }
+    public ArrayList<WaterSource> getSources(){ return sources; }
+    public void removeSource(int x, int y){
+        for(int i=0; i<sources.size(); i++){
+            if (sources.get(i).getX()==x && sources.get(i).getY()==y){
+                sources.remove(i);
+                break;
+            }
+        }
+    }
 
 
 //    @Override
