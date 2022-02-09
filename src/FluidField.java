@@ -248,10 +248,20 @@ public class FluidField {
         return w;
     }
 
-    public double[] getDensity(){ return density; }
-    public double[] getVx(){ return vx; }
-    public double[] getVy(){ return vy; }
+    public double[] getDensityArr(){ return density; }
+    public double[] getVxArr(){ return vx; }
+    public double[] getVyArr(){ return vy; }
     public Boolean[] getWalls(){ return walls; }
+
+    public Boolean getWall(int i, int j){ return walls[IX(i,j)]; }
+    public double getDensity(int i, int j){ return density[IX(i,j)]; }
+    public double getVx(int i, int j){ return vx[IX(i,j)]; }
+    public double getVy(int i, int j){ return vy[IX(i,j)]; }
+
+    public void setWall(int i, int j, boolean b){ walls[IX(i,j)]=b; }
+    public void setDensity(int i, int j, double d){ density[IX(i,j)]=d; }
+    public void setVx(int i, int j, double v){ vx[IX(i,j)]=v; }
+    public void setVy(int i, int j, double v){ vy[IX(i,j)]=v; }
 
 
 //    @Override
