@@ -164,7 +164,7 @@ public class GridDemoPanel extends JPanel implements MouseListener, KeyListener
 	 */
 	public void initiateAnimationLoop()
 	{
-		Thread aniThread = new Thread( new AnimationThread(500)); // the number here is the number of milliseconds between steps.
+		Thread aniThread = new Thread( new AnimationThread(10)); // the number here is the number of milliseconds between steps.
 		aniThread.start();
 	}
 	
