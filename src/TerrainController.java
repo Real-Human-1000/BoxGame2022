@@ -34,7 +34,10 @@ public class TerrainController {
                         distdist = thisdist;
                 }
 
-                terrain[y][x] = distdist;
+                if (distdist < 1)
+                    distdist = distdist + 1;
+
+                terrain[y][x] = 1 / distdist;
             }
         }
 
