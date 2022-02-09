@@ -42,7 +42,7 @@ public class TerrainController {
         }
 
         printArray(terrain);
-        printLocs(points);
+        snazzyDisplay();
     }
 
     public void printArray(double[][] arr) {
@@ -55,19 +55,17 @@ public class TerrainController {
         }
     }
 
-    public void printLocs(double[][] points) {
-        // Prints the locations of the points made in generateTerrain
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                boolean pointDrawn = false;
-                for (double[] point : points) {
-                    if ((int)point[0] == x && (int)point[1] == y) {
-                        System.out.print("(0)");
-                        pointDrawn = true;
-                    }
-                }
-                if (!pointDrawn)
-                    System.out.print("...");
+    public void snazzyDisplay() {
+        for (double[] row : terrain) {
+            for (double col : row) {
+                if (col < 0.25)
+                    System.out.print("   ");
+                if (col >= 0.25 && col < 0.5)
+                    System.out.print("░░░");
+                if (col >= 0.5 && col < 0.75)
+                    System.out.print("▒▒▒");
+                if (col >= 0.75)
+                    System.out.print("▓▓▓");
             }
             System.out.println();
         }
