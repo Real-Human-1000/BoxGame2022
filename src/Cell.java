@@ -21,6 +21,9 @@ public class Cell
 	private String marker; // optional character (typically a letter or number) to show on this cell
 	private boolean displayMarker; // whether to show the cell label or not.
 	private boolean isLive; // whether the cell should appear at all.
+
+	private CellFlipThread flipThread;
+	private boolean colorChanged = false;
 	
 	//=====================  CONSTRUCTORS =============================
 	public Cell()
@@ -76,7 +79,10 @@ public class Cell
 	 */
 	public void cycleColorIDForward()
 	{
+		flipThread = new CellFlipThread(this,colorID);
+		colorChanged = true;
 		colorID = (colorID + 1) % filenames.length;
+
 	}
 
 	/**
@@ -84,6 +90,8 @@ public class Cell
 	 */
 	public void cycleColorIDBackward()
 	{
+		flipThread = new CellFlipThread(this,colorID);
+		colorChanged = true;
 		colorID = (colorID+ (filenames.length-1)) %filenames.length;
 	}
 	public int getX()
@@ -126,6 +134,10 @@ public class Cell
 		this.displayMarker = displayMarker;
 	}
 
+	public Image getMyImage(){return colorImages[colorID];}
+
+	public Image getImageAtIndex(int i){return colorImages[i];}
+
 	public boolean isLive()
 	{
 		return isLive;
@@ -140,17 +152,26 @@ public class Cell
 	{
 		if (!isLive)
 			return;
-		Graphics2D g2 = (Graphics2D)g;
-		g2.drawImage(colorImages[colorID], x,y, CELL_SIZE-2, CELL_SIZE-2, null);
-		   
-		g2.setColor(new Color(192,192,192));
-		g2.setStroke(new BasicStroke(3));
-		g2.drawRoundRect(x+1, y+1, CELL_SIZE-4, CELL_SIZE-4, 8, 8);
-		
-		g2.setColor(new Color(64,64,64));
-		g2.setStroke(new BasicStroke(2));
-		g2.drawRoundRect(x+1, y+1, CELL_SIZE-4, CELL_SIZE-4, 8, 8);
-		   
+		Graphics2D g2 = (Graphics2D) g;
+		if(colorChanged){
+			flipThread.setG(g);
+			flipThread.run();
+			colorChanged = false;
+		}else {
+
+			g2.drawImage(colorImages[colorID], x, y, CELL_SIZE - 2, CELL_SIZE - 2, null);
+			//g2.drawImage(colorImages[colorID].getScaledInstance(12,12,2), x, y, CELL_SIZE - 2, CELL_SIZE - 2, null);
+
+			g2.setColor(new Color(192, 192, 192));
+			g2.setStroke(new BasicStroke(3));
+			g2.drawRoundRect(x + 1, y + 1, CELL_SIZE - 4, CELL_SIZE - 4, 8, 8);
+
+			g2.setColor(new Color(64, 64, 64));
+			g2.setStroke(new BasicStroke(2));
+			g2.drawRoundRect(x + 1, y + 1, CELL_SIZE - 4, CELL_SIZE - 4, 8, 8);
+		}
+
+
 		if (displayMarker)
 		{
 			g2.setFont(cellFont);
