@@ -23,7 +23,7 @@ public class Cell
 	private boolean displayMarker; // whether to show the cell label or not.
 	private boolean isLive; // whether the cell should appear at all.
 
-	private CellFlipThread flipThread;
+	private CellFlipManager flipThread;
 	private boolean colorChanged = false;
 	
 	//=====================  CONSTRUCTORS =============================
@@ -45,9 +45,15 @@ public class Cell
 
 			scaledColorImages = new Image[10][filenames.length];
 			for (int i = 0; i < filenames.length; i++) {
-				for (int j = 1; j <= 10; j++) {
-					scaledColorImages[(j-1)][i] = colorImages[i].getScaledInstance(
-					colorImages[i].getWidth(null),colorImages[i].getHeight(null)/j,2);
+				for (int j = 0; j < 10; j++) {
+					try {
+						scaledColorImages[(j)][i] = colorImages[i].getScaledInstance(
+								colorImages[i].getWidth(null),
+								(int) (colorImages[i].getHeight(null) * Math.sin(j * Math.PI / 18)), Image.SCALE_DEFAULT);
+						//(int)(Math.floor(colorImages[i].getHeight(null)/(11-(j+1)))),Image.SCALE_DEFAULT);
+					}catch (IllegalArgumentException e){
+						scaledColorImages[j][i] = colorImages[i];
+					}
 				}
 			}
 		}
@@ -88,7 +94,7 @@ public class Cell
 	 */
 	public void cycleColorIDForward()
 	{
-		flipThread = new CellFlipThread(this,colorID);
+		flipThread = new CellFlipManager(this,colorID);
 		colorChanged = true;
 		colorID = (colorID + 1) % filenames.length;
 
@@ -99,7 +105,7 @@ public class Cell
 	 */
 	public void cycleColorIDBackward()
 	{
-		flipThread = new CellFlipThread(this,colorID);
+		flipThread = new CellFlipManager(this,colorID);
 		colorChanged = true;
 		colorID = (colorID+ (filenames.length-1)) %filenames.length;
 	}

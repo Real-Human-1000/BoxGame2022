@@ -206,7 +206,7 @@ public class GridDemoPanel extends JPanel implements MouseListener, KeyListener
 					start = System.currentTimeMillis();
 				}
 				try
-				{	Thread.sleep(100);
+				{	Thread.sleep(1);
 				}
 				catch (InterruptedException iExp)
 				{
