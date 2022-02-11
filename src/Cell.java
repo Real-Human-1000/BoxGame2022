@@ -187,7 +187,7 @@ public class Cell
 			//colorChanged = false;
 		}else {
 
-			g2.drawImage(colorImages[colorID], x, y, CELL_SIZE - 2, CELL_SIZE - 2, null);
+			g2.drawImage(colorImages[colorID], x, y, CELL_SIZE, CELL_SIZE, null);
 			//g2.drawImage(colorImages[colorID].getScaledInstance(12,12,2), x, y, CELL_SIZE - 2, CELL_SIZE - 2, null);
 
 			//g2.setColor(new Color(192, 192, 192));

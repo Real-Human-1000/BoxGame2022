@@ -46,11 +46,11 @@ public class CellFlipManager extends Thread{
             scaledImage = myCell.getMyScaledImage(scaleFactor);//.getScaledInstance(imageWidth,(int)(imageHeight*scaleFactor),Image.SCALE_DEFAULT);
         }
 
-        int scaledHeight = Math.min(scaledImage.getHeight(null),Cell.CELL_SIZE-2);
+        int scaledHeight = Math.min(scaledImage.getHeight(null),Cell.CELL_SIZE);
 
         if(myCycles!=10) {
             g2.drawImage(scaledImage, x, y + Cell.CELL_SIZE / 2 - scaledHeight / 2,
-                    Cell.CELL_SIZE - 2, scaledHeight, null);
+                    Cell.CELL_SIZE, scaledHeight, null);
         }
         /*
         g2.setColor(new Color(192,192,192));
