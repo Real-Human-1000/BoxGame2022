@@ -14,6 +14,7 @@ public class CellFlipThread extends Thread{
         y = setCell.getY();
         myCell = setCell;
         myCycles = 1;
+        this.lastImageIndex = lastImageIndex;
     }
 
     public void setG(Graphics g) {
@@ -59,6 +60,8 @@ public class CellFlipThread extends Thread{
 
     public void drawSelf(){
         Graphics2D g2 = (Graphics2D)g;
+        g2.fillRect(x, y, Cell.CELL_SIZE, Cell.CELL_SIZE);
+        System.out.println("black rect drawn");
         int scaleFactor = Math.abs(10-myCycles);
         //System.out.println("draw");
         //if(scaleFactor==0){
@@ -72,7 +75,7 @@ public class CellFlipThread extends Thread{
             scaledImage = myCell.getMyScaledImage(scaleFactor);//.getScaledInstance(imageWidth,(int)(imageHeight*scaleFactor),Image.SCALE_DEFAULT);
         }
         g2.setColor(Color.BLACK);
-        g2.fillRect(x, y, Cell.CELL_SIZE*2, Cell.CELL_SIZE*2);
+        g2.fillRect(x, y, Cell.CELL_SIZE, Cell.CELL_SIZE);
         g2.drawImage(scaledImage, x,y,  Cell.CELL_SIZE-2,(Cell.CELL_SIZE-2), null);
         /*
         g2.setColor(new Color(192,192,192));

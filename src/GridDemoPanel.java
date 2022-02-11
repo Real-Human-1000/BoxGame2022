@@ -45,6 +45,7 @@ public class GridDemoPanel extends JPanel implements MouseListener, KeyListener
 	public void paintComponent(Graphics g)
 	{
 		super.paintComponent(g);
+		//g.clearRect(0,0,getWidth(),getHeight());
 		for (int r =0; r<NUM_ROWS; r++)
 			for (int c=0; c<NUM_COLS; c++)
 				theGrid[r][c].drawSelf(g);
