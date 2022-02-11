@@ -4,6 +4,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.ArrayList;
 
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -177,7 +178,8 @@ public class GridDemoPanel extends JPanel implements MouseListener, KeyListener
 	 */
 	public void animationStep(long millisecondsSinceLastStep)
 	{
-		theGrid[0][0].cycleColorIDBackward();
+		//theGrid[0][0].cycleColorIDBackward();
+		//System.out.println("step");
 		repaint();
 	}
 	// ------------------------------- animation thread - internal class -------------------
@@ -203,7 +205,7 @@ public class GridDemoPanel extends JPanel implements MouseListener, KeyListener
 					start = System.currentTimeMillis();
 				}
 				try
-				{	Thread.sleep(1);
+				{	Thread.sleep(100);
 				}
 				catch (InterruptedException iExp)
 				{

@@ -13,6 +13,7 @@ public class Cell
 	public static final int CELL_SIZE = 25;
 	private static Font cellFont = new Font("Times New Roman",Font.BOLD,CELL_SIZE*3/4);
 	private static Image[] colorImages; // these will be filled with the images in the following files.
+	private static Image[][] scaledColorImages;
 	private static String[] filenames = {"BlueChip.png", "GreenChip.png", "PurpleChip.png", "RedChip.png", "YellowChip.png"};
 	private static String[] cellColors = {"Blue","Green","Purple","Red","Yellow"};
 	
@@ -41,6 +42,14 @@ public class Cell
 			colorImages = new Image[filenames.length];
 			for (int i =0; i<filenames.length; i++)
 				colorImages[i] = (new ImageIcon(filenames[i])).getImage();
+
+			scaledColorImages = new Image[10][filenames.length];
+			for (int i = 0; i < filenames.length; i++) {
+				for (int j = 1; j <= 10; j++) {
+					scaledColorImages[(j-1)][i] = colorImages[i].getScaledInstance(
+					colorImages[i].getWidth(null),colorImages[i].getHeight(null)/j,2);
+				}
+			}
 		}
 	}
 	
@@ -136,7 +145,20 @@ public class Cell
 
 	public Image getMyImage(){return colorImages[colorID];}
 
+	public Image getMyScaledImage(int index){return scaledColorImages[index][colorID];}
+
 	public Image getImageAtIndex(int i){return colorImages[i];}
+
+	public Image getScaledImageAtIndex(int i, int scaleIndex){return scaledColorImages[scaleIndex][i];}
+
+	public void setColorChanged(boolean colorChanged) {
+		this.colorChanged = colorChanged;
+	}
+
+	public boolean isColorChanged() {
+		return colorChanged;
+	}
+
 
 	public boolean isLive()
 	{
@@ -154,9 +176,10 @@ public class Cell
 			return;
 		Graphics2D g2 = (Graphics2D) g;
 		if(colorChanged){
+			System.out.println("going");
 			flipThread.setG(g);
-			flipThread.run();
-			colorChanged = false;
+			flipThread.updateAnim();
+			//colorChanged = false;
 		}else {
 
 			g2.drawImage(colorImages[colorID], x, y, CELL_SIZE - 2, CELL_SIZE - 2, null);
