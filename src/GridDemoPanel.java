@@ -12,8 +12,8 @@ import javax.swing.JPanel;
 public class GridDemoPanel extends JPanel implements MouseListener, KeyListener
 {
 	private Cell[][] theGrid;
-	public final static int NUM_ROWS = 24;
-	public final static int NUM_COLS = 24;
+	public final static int NUM_ROWS = 36;
+	public final static int NUM_COLS = 36;
 	public GridDemoFrame myParent;
 	public int score;
 	

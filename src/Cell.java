@@ -182,7 +182,6 @@ public class Cell
 			return;
 		Graphics2D g2 = (Graphics2D) g;
 		if(colorChanged){
-			System.out.println("going");
 			flipThread.setG(g);
 			flipThread.updateAnim();
 			//colorChanged = false;
@@ -191,13 +190,13 @@ public class Cell
 			g2.drawImage(colorImages[colorID], x, y, CELL_SIZE - 2, CELL_SIZE - 2, null);
 			//g2.drawImage(colorImages[colorID].getScaledInstance(12,12,2), x, y, CELL_SIZE - 2, CELL_SIZE - 2, null);
 
-			g2.setColor(new Color(192, 192, 192));
-			g2.setStroke(new BasicStroke(3));
-			g2.drawRoundRect(x + 1, y + 1, CELL_SIZE - 4, CELL_SIZE - 4, 8, 8);
+			//g2.setColor(new Color(192, 192, 192));
+			//g2.setStroke(new BasicStroke(3));
+			//g2.drawRoundRect(x + 1, y + 1, CELL_SIZE - 4, CELL_SIZE - 4, 8, 8);
 
-			g2.setColor(new Color(64, 64, 64));
-			g2.setStroke(new BasicStroke(2));
-			g2.drawRoundRect(x + 1, y + 1, CELL_SIZE - 4, CELL_SIZE - 4, 8, 8);
+			//g2.setColor(new Color(64, 64, 64));
+			//g2.setStroke(new BasicStroke(2));
+			//g2.drawRoundRect(x + 1, y + 1, CELL_SIZE - 4, CELL_SIZE - 4, 8, 8);
 		}
 
 
