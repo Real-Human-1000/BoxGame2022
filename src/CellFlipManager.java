@@ -1,9 +1,12 @@
 import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.awt.image.RescaleOp;
 
 public class CellFlipManager extends Thread{
     int x,y, myCycles,imageWidth,imageHeight,lastImageIndex;
     Cell myCell;
     Graphics g;
+    double waterLevel = 0.5;
 
     public CellFlipManager(){
 
@@ -20,6 +23,8 @@ public class CellFlipManager extends Thread{
     public void setG(Graphics g) {
         this.g = g;
     }
+
+    public void setWaterLevel(double wl){waterLevel=wl;}
 
     //@Override
     public void updateAnim() {
@@ -49,8 +54,22 @@ public class CellFlipManager extends Thread{
         int scaledHeight = Math.min(scaledImage.getHeight(null),Cell.CELL_SIZE);
 
         if(myCycles!=10) {
+//            BufferedImage brightAdjust = new BufferedImage(Cell.CELL_SIZE,scaledHeight,BufferedImage.TYPE_INT_RGB);
+//
+//            Graphics2D brightAdjustGraphics = brightAdjust.createGraphics();
+//            brightAdjustGraphics.drawImage(scaledImage,x,y,Cell.CELL_SIZE,scaledHeight,null);
+//            brightAdjustGraphics.dispose();
+//
+//            RescaleOp op = new RescaleOp((float)waterLevel*2.0f, 0, null);
+//            brightAdjust = op.filter(brightAdjust,null);
+//
+//            g2.drawImage(brightAdjust, x, y + Cell.CELL_SIZE / 2 - scaledHeight / 2,
+//                    Cell.CELL_SIZE, scaledHeight, null);
+
             g2.drawImage(scaledImage, x, y + Cell.CELL_SIZE / 2 - scaledHeight / 2,
                     Cell.CELL_SIZE, scaledHeight, null);
+
+
         }
         /*
         g2.setColor(new Color(192,192,192));

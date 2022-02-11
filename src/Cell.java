@@ -44,6 +44,22 @@ public class Cell
 			colorImages = new Image[filenames.length];
 			for (int i =0; i<filenames.length; i++) {
 				colorImages[i] = (new ImageIcon(filenames[i])).getImage();
+
+
+				/*
+				BufferedImage bimage = new BufferedImage(CELL_SIZE,
+						CELL_SIZE, BufferedImage.TYPE_INT_RGB);
+
+				// Copy non-RGB image to the RGB buffered image
+				Graphics2D g = bimage.createGraphics();
+				g.drawImage(colorImages[i], 0, 0,CELL_SIZE,CELL_SIZE,null);
+				g.dispose();
+
+				RescaleOp op = new RescaleOp(0.3f, 0, null);
+				bimage = op.filter(bimage,null);
+
+				colorImages[i] = bimage;*/
+
 			}
 
 			scaledColorImages = new Image[10][filenames.length];
@@ -92,7 +108,7 @@ public class Cell
 		return colorID;
 	}
 
-	public void setColorID(int colorID)
+	public void setColorID(int colorID,double waterLevel)
 	{
 		flipThread = new CellFlipManager(this,this.colorID);
 		colorChanged = true;
