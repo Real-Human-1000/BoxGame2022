@@ -3,17 +3,20 @@ public class TerrainController {
     int width, height;
     private FluidField ffield;
     private double[][] terrain;
+    private String asciiGrays = " .:-=+*#%@";
+    private String blockShades = " ░▒▓";
 
     public TerrainController(int w, int h) {
         this.width = w;
         this.height = h;
-        this.ffield = new FluidField(h, w);
+        this.ffield = new FluidField(h, w);  // Jack tells me to keep this a square
 
-        // You could call generateTerrain() in here but I thought I'd keep it separate for now
+        // You could call generateTerrain() in here, but I thought I'd keep it separate for now
     }
 
     public void generateTerrain() {
         // Fills terrain with random doubles as a starting point for the simulation
+        // Uses Worley Noise for now
         terrain = new double[height][width];
 
         double[][] points = new double[10][2];
@@ -45,6 +48,22 @@ public class TerrainController {
         snazzyDisplay();
     }
 
+    public double getTerrainAt(int x, int y) {
+        return terrain[x][y];
+    }
+
+    public double[][] getTerrain() {
+        return terrain;
+    }
+
+    public double getFluidAt(int x, int y) {
+        return ffield.getDensity(x, y);
+    }
+
+    public double[] getFluid() {
+        return ffield.getDensityArr();
+    }
+
     public void printArray(double[][] arr) {
         // Prints a 2D array of doubles
         for (double[] row : arr) {
@@ -58,14 +77,9 @@ public class TerrainController {
     public void snazzyDisplay() {
         for (double[] row : terrain) {
             for (double col : row) {
-                if (col < 0.25)
-                    System.out.print("   ");
-                if (col >= 0.25 && col < 0.5)
-                    System.out.print("░░░");
-                if (col >= 0.5 && col < 0.75)
-                    System.out.print("▒▒▒");
-                if (col >= 0.75)
-                    System.out.print("▓▓▓");
+                for (int i = 0; i < 3; i++) {
+                    System.out.print(asciiGrays.charAt((int) (col * (asciiGrays.length()))));
+                }
             }
             System.out.println();
         }
