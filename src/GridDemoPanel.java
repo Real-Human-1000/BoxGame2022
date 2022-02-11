@@ -4,6 +4,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.ArrayList;
 
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -11,8 +12,8 @@ import javax.swing.JPanel;
 public class GridDemoPanel extends JPanel implements MouseListener, KeyListener
 {
 	private Cell[][] theGrid;
-	public final static int NUM_ROWS = 24;
-	public final static int NUM_COLS = 24;
+	public final static int NUM_ROWS = 36;
+	public final static int NUM_COLS = 36;
 	public GridDemoFrame myParent;
 	public int score;
 	
@@ -44,6 +45,7 @@ public class GridDemoPanel extends JPanel implements MouseListener, KeyListener
 	public void paintComponent(Graphics g)
 	{
 		super.paintComponent(g);
+		//g.clearRect(0,0,getWidth(),getHeight());
 		for (int r =0; r<NUM_ROWS; r++)
 			for (int c=0; c<NUM_COLS; c++)
 				theGrid[r][c].drawSelf(g);
@@ -177,7 +179,8 @@ public class GridDemoPanel extends JPanel implements MouseListener, KeyListener
 	 */
 	public void animationStep(long millisecondsSinceLastStep)
 	{
-		theGrid[0][0].cycleColorIDBackward();
+		//theGrid[0][0].cycleColorIDBackward();
+		//System.out.println("step");
 		repaint();
 	}
 	// ------------------------------- animation thread - internal class -------------------

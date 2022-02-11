@@ -30,7 +30,7 @@ public class GridDemoFrame extends JFrame
 		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setVisible(true);	
-	//	thePanel.initiateAnimationLoop(); // uncomment this line if your program uses animation.
+		thePanel.initiateAnimationLoop(); // uncomment this line if your program uses animation.
 	}
 	
 	public void updateMessage(String message)
