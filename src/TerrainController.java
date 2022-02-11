@@ -19,7 +19,8 @@ public class TerrainController {
         // Uses Worley Noise for now
         terrain = new double[height][width];
 
-        double[][] points = new double[10][2];
+        double[][] points = new double[height*width/10][2];
+        System.out.println(height*width/10);
 
         for (double[] point : points) {
             point[0] = Math.random() * width;
@@ -46,6 +47,36 @@ public class TerrainController {
 
         printArray(terrain);
         snazzyDisplay();
+    }
+
+    public void update() {
+        // Updates itself and the fluid field
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                // Change terrain heights
+                double speed = Math.sqrt(Math.pow(ffield.getVx(x, y), 2) + Math.pow(ffield.getVy(x, y), 2));
+                // Min speed is 0, max speed is (realistically) 5
+                // Sqrt isn't efficient, but it makes the deltaTerrain algorithm simpler
+
+                // double amount = ffield.getDensity(x, y);
+                // Maybe I'll use amount to calculate erosion later
+
+                double deltaTerrain = -1 * Math.pow(speed - 2.5, 3) / 500;
+
+                terrain[y][x] = terrain[y][x] + deltaTerrain;
+
+                // Change wall status
+                ffield.setWall(x, y, terrain[y][x] > 0.4);  // "sea level"
+                ffield.setVx(x, y, ffield.getVx(x, y) - terrain[y][x] * ffield.getVx(x, y));
+                ffield.setVy(x, y, ffield.getVy(x, y) - terrain[y][x] * ffield.getVy(x, y));
+            }
+        }
+    }
+
+    public void stepAndUpdate() {
+        // Steps fluid field and updates terrain
+        ffield.step();
+        update();
     }
 
     public double getTerrainAt(int x, int y) {

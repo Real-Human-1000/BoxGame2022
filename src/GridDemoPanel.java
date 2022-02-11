@@ -33,7 +33,7 @@ public class GridDemoPanel extends JPanel implements MouseListener, KeyListener
 		terrainController = new TerrainController(NUM_ROWS,NUM_COLS);
 		terrainController.generateTerrain();
 		terrainMap = terrainController.getTerrain();
-	}	
+	}
 	
 	/**
 	 * makes a new board with random colors, completely filled in, and resets the score to zero.

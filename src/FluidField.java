@@ -221,7 +221,6 @@ public class FluidField {
                     x[IX(i, j)] = x[IX(i, j)];
                 }
             }
-
         }
     }
 
