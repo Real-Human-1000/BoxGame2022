@@ -4,13 +4,15 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.image.BufferedImage;
+import java.awt.image.RescaleOp;
 
 import javax.swing.ImageIcon;
 
 public class Cell
 {
 	// ----- static variables.... These belong to the class as a whole; all Cells have access to these individual variables.
-	public static final int CELL_SIZE = 15;
+	public static final int CELL_SIZE = 8;
 	private static Font cellFont = new Font("Times New Roman",Font.BOLD,CELL_SIZE*3/4);
 	private static Image[] colorImages; // these will be filled with the images in the following files.
 	private static Image[][] scaledColorImages;
@@ -40,17 +42,22 @@ public class Cell
 		if (colorImages == null)
 		{
 			colorImages = new Image[filenames.length];
-			for (int i =0; i<filenames.length; i++)
+			for (int i =0; i<filenames.length; i++) {
 				colorImages[i] = (new ImageIcon(filenames[i])).getImage();
+			}
 
 			scaledColorImages = new Image[10][filenames.length];
 			for (int i = 0; i < filenames.length; i++) {
 				for (int j = 0; j < 10; j++) {
 					try {
 						scaledColorImages[(j)][i] = colorImages[i].getScaledInstance(
-								colorImages[i].getWidth(null),
-								(int) (colorImages[i].getHeight(null) * Math.sin(j * Math.PI / 18)), Image.SCALE_DEFAULT);
-						//(int)(Math.floor(colorImages[i].getHeight(null)/(11-(j+1)))),Image.SCALE_DEFAULT);
+								CELL_SIZE,
+								(int) (CELL_SIZE * Math.sin(j * Math.PI / 18)), Image.SCALE_DEFAULT);
+
+
+//						scaledColorImages[(j)][i] = colorImages[i].getScaledInstance(
+//								colorImages[i].getWidth(null),
+//								(int) (colorImages[i].getHeight(null) * Math.sin(j * Math.PI / 18)), Image.SCALE_DEFAULT);
 					}catch (IllegalArgumentException e){
 						scaledColorImages[j][i] = colorImages[i];
 					}
@@ -87,6 +94,8 @@ public class Cell
 
 	public void setColorID(int colorID)
 	{
+		flipThread = new CellFlipManager(this,this.colorID);
+		colorChanged = true;
 		this.colorID = colorID;
 	}
 	/**

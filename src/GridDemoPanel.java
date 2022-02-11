@@ -12,22 +12,27 @@ import javax.swing.JPanel;
 public class GridDemoPanel extends JPanel implements MouseListener, KeyListener
 {
 	private Cell[][] theGrid;
-	public final static int NUM_ROWS = 36;
-	public final static int NUM_COLS = 36;
+	private double[][] terrainMap;
+	public final static int NUM_ROWS = 70;
+	public final static int NUM_COLS = 70;
 	public GridDemoFrame myParent;
+	public TerrainController terrainController;
 	public int score;
 	
 	public GridDemoPanel(GridDemoFrame parent)
 	{
 		super();
 		resetCells();
-		theGrid[2][2].setMarker("A");
-		theGrid[2][2].setDisplayMarker(true);
-		theGrid[3][3].setIsLive(false);
+//		theGrid[2][2].setMarker("A");
+//		theGrid[2][2].setDisplayMarker(true);
+//		theGrid[3][3].setIsLive(false);
 		setBackground(Color.BLACK);
 		addMouseListener(this);
 		//parent.addKeyListener(this); // activate this if you wish to listen to the keyboard. 
 		myParent = parent;
+		terrainController = new TerrainController(NUM_ROWS,NUM_COLS);
+		terrainController.generateTerrain();
+		terrainMap = terrainController.getTerrain();
 	}	
 	
 	/**
@@ -47,8 +52,16 @@ public class GridDemoPanel extends JPanel implements MouseListener, KeyListener
 		super.paintComponent(g);
 		//g.clearRect(0,0,getWidth(),getHeight());
 		for (int r =0; r<NUM_ROWS; r++)
-			for (int c=0; c<NUM_COLS; c++)
+			for (int c=0; c<NUM_COLS; c++) {
+				if (terrainMap[r][c] >= 0.1) {
+					theGrid[r][c].setColorID(1);
+				}else{
+					if(theGrid[r][c].getColorID()!=0){
+						theGrid[r][c].setColorID(0);
+					}
+				}
 				theGrid[r][c].drawSelf(g);
+			}
 	}
 	
 	/**
