@@ -74,9 +74,10 @@ public class TerrainController {
             }
         }
 
-//        for (int r = 0; r < 3; r++) {
-//            int[] pos = {Math.random()*width, Math.random()*height/2};
-//        }
+        for (int r = 0; r < 3; r++) {
+            int[] pos = {(int)(Math.random()*width), (int)(Math.random()*height/2)};
+
+        }
 
     }
 
