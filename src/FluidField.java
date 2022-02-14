@@ -16,9 +16,9 @@ public class FluidField {
     private int h;
     private int w;
 
-    private double dt=0.005;
+    private double dt=0.0000001;
     private double visc = 0.0001;
-    private double diff = 0.000001;
+    private double diff = 0.0001;
     private int N;
 
     private double t;
@@ -172,9 +172,9 @@ public class FluidField {
                 x[IX(0, i)] = x[IX(1, i)];
             }
             if ((b == 1)) {
-                x[IX(N+1,i)] = -x[IX(N,i)];
+                //x[IX(N+1,i)] = -x[IX(N,i)];
             } else {
-                x[IX(N+1,i)] = x[IX(N,i)];
+                //x[IX(N+1,i)] = x[IX(N,i)];
             }
             if ((b == 2)) {
                 x[IX(i,0 )] = -x[IX(i,1)];
