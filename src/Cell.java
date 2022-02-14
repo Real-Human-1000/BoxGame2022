@@ -134,6 +134,13 @@ public class Cell
 		colorChanged = true;
 		colorID = (colorID+ (filenames.length-1)) %filenames.length;
 	}
+
+	public void setColorID(int colorID) {
+		flipThread = new CellFlipManager(this,colorID);
+		colorChanged = true;
+		this.colorID = colorID;
+	}
+
 	public int getX()
 	{
 		return x;
