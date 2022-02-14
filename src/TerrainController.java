@@ -3,8 +3,6 @@ public class TerrainController {
     int width, height;
     private FluidField ffield;
     private double[][] terrain;
-    private String asciiGrays = " .:-=+*#%@";
-    private String blockShades = " ░▒▓";
 
     public TerrainController(int w, int h) {
         this.width = w;
@@ -18,7 +16,7 @@ public class TerrainController {
 
     public void worleyTerrain() {
         // Fills terrain with random doubles as a starting point for the simulation
-        // Uses Worley Noise for now -- generates lots of random points and assigns random values based on distance to the nearest
+        // Uses Worley Noise -- generates lots of random points and assigns random values based on distance to the nearest
         terrain = new double[height][width];
 
         double[][] points = new double[(int)Math.sqrt(height*height + width*width)][2]; // (int)Math.sqrt(height*width)
@@ -49,7 +47,7 @@ public class TerrainController {
 
     public void polyTerrain() {
         // Fills terrain with random doubles as a starting point for the simulation
-        // Uses noise generated from Voronoi polygons. Basically Worley noise again but cooler and better for a river
+        // Uses noise generated from Voronoi polygons. Basically Worley noise again but cooler and better for our purposes
         terrain = new double[height][width];
 
         double[][] points = new double[100][3];
@@ -75,6 +73,10 @@ public class TerrainController {
                 terrain[y][x] = Math.max(Math.min(points[closestIndex][2] + (Math.random() - 0.5)/16, 1), 0);
             }
         }
+
+//        for (int r = 0; r < 3; r++) {
+//            int[] pos = {Math.random()*width, Math.random()*height/2};
+//        }
 
     }
 
@@ -135,10 +137,15 @@ public class TerrainController {
     }
 
     public void snazzyDisplay() {
+        // Displays terrain in ASCII art
+        // Useful for when Ravi is taking forever to get some graphics thing working
+        String asciiGrays = " .:-=+*#%@";
+        String blockShades = " ░▒▓";
+
         for (double[] row : terrain) {
             for (double col : row) {
                 for (int i = 0; i < 3; i++) {
-                    System.out.print(asciiGrays.charAt(Math.min((int) (col * (asciiGrays.length())), asciiGrays.length()-1)));
+                    System.out.print(blockShades.charAt(Math.min((int) (col * (blockShades.length())), blockShades.length()-1)));
                 }
             }
             System.out.println();
