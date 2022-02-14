@@ -31,7 +31,6 @@ public class GridDemoPanel extends JPanel implements MouseListener, KeyListener
 		//parent.addKeyListener(this); // activate this if you wish to listen to the keyboard. 
 		myParent = parent;
 		terrainController = new TerrainController(NUM_ROWS,NUM_COLS);
-		terrainController.generateTerrain();
 		terrainMap = terrainController.getTerrain();
 	}
 	
@@ -53,7 +52,7 @@ public class GridDemoPanel extends JPanel implements MouseListener, KeyListener
 		//g.clearRect(0,0,getWidth(),getHeight());
 		for (int r =0; r<NUM_ROWS; r++)
 			for (int c=0; c<NUM_COLS; c++) {
-				if (terrainMap[r][c] >= 0.1) {
+				if (terrainMap[r][c] >= 0.3) {
 					theGrid[r][c].setColorID(1);
 				}else{
 					if(theGrid[r][c].getColorID()!=0){

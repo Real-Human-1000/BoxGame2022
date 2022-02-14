@@ -11,16 +11,17 @@ public class TerrainController {
         this.height = h;
         this.ffield = new FluidField(h, w);  // Jack tells me to keep this a square
 
-        // You could call generateTerrain() in here, but I thought I'd keep it separate for now
+        // worleyTerrain();  // Good for islands
+        polyTerrain();  // Good for one river
+        snazzyDisplay();
     }
 
-    public void generateTerrain() {
+    public void worleyTerrain() {
         // Fills terrain with random doubles as a starting point for the simulation
-        // Uses Worley Noise for now
+        // Uses Worley Noise for now -- generates lots of random points and assigns random values based on distance to the nearest
         terrain = new double[height][width];
 
-        double[][] points = new double[height*width/10][2];
-        System.out.println(height*width/10);
+        double[][] points = new double[(int)Math.sqrt(height*height + width*width)][2]; // (int)Math.sqrt(height*width)
 
         for (double[] point : points) {
             point[0] = Math.random() * width;
@@ -44,9 +45,37 @@ public class TerrainController {
                 terrain[y][x] = 1 / distdist;
             }
         }
+    }
 
-        printArray(terrain);
-        snazzyDisplay();
+    public void polyTerrain() {
+        // Fills terrain with random doubles as a starting point for the simulation
+        // Uses noise generated from Voronoi polygons. Basically Worley noise again but cooler and better for a river
+        terrain = new double[height][width];
+
+        double[][] points = new double[100][3];
+
+        for (int p = 0; p < points.length; p++) {
+            double h = Math.random()*height;
+            points[p] = new double[] {Math.random() * width, h, 1 - h/height + (Math.random() - 0.5)/4};
+        }
+
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                double distdist = width*width + height*height;
+                int closestIndex = 0;
+
+                for (int p = 0; p < points.length; p++) {
+                    double thisdist = (Math.pow(x - points[p][0], 2) + Math.pow(y - points[p][1], 2)) * (Math.random()/4 + 0.875);
+                    if (thisdist < distdist) {
+                        distdist = thisdist;
+                        closestIndex = p;
+                    }
+                }
+
+                terrain[y][x] = Math.max(Math.min(points[closestIndex][2] + (Math.random() - 0.5)/16, 1), 0);
+            }
+        }
+
     }
 
     public void update() {
@@ -109,7 +138,7 @@ public class TerrainController {
         for (double[] row : terrain) {
             for (double col : row) {
                 for (int i = 0; i < 3; i++) {
-                    System.out.print(asciiGrays.charAt((int) (col * (asciiGrays.length()))));
+                    System.out.print(asciiGrays.charAt(Math.min((int) (col * (asciiGrays.length())), asciiGrays.length()-1)));
                 }
             }
             System.out.println();
