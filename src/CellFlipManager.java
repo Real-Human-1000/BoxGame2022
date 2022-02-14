@@ -51,6 +51,9 @@ public class CellFlipManager extends Thread{
             scaledImage = myCell.getMyScaledImage(scaleFactor);//.getScaledInstance(imageWidth,(int)(imageHeight*scaleFactor),Image.SCALE_DEFAULT);
         }
 
+
+
+
         int scaledHeight = Math.min(scaledImage.getHeight(null),Cell.CELL_SIZE);
 
         if(myCycles!=10) {

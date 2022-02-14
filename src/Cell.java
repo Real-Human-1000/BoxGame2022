@@ -212,8 +212,22 @@ public class Cell
 			//colorChanged = false;
 		}else {
 
-			g2.drawImage(colorImages[colorID], x, y, CELL_SIZE, CELL_SIZE, null);
+			//g2.drawImage(colorImages[colorID], x, y, CELL_SIZE, CELL_SIZE, null);
 			//g2.drawImage(colorImages[colorID].getScaledInstance(12,12,2), x, y, CELL_SIZE - 2, CELL_SIZE - 2, null);
+
+
+//			g2.setColor(new Color(52,180,235));
+//			g2.setStroke(new BasicStroke(2,BasicStroke.CAP_ROUND,BasicStroke.JOIN_BEVEL));
+//			g2.fillRoundRect(x+1, y+1, CELL_SIZE-1, CELL_SIZE-1, 1, 1);
+//
+//			g2.setColor(new Color(52,180,235));
+//			g2.setStroke(new BasicStroke(2,BasicStroke.CAP_ROUND,BasicStroke.JOIN_BEVEL));
+//			g2.drawRoundRect(x+1, y+1, CELL_SIZE-2, CELL_SIZE-2, 1, 1);
+
+//			g2.setColor(mixColor(new Color(52,180,235),Color.BLACK,0.5));
+//			g2.setStroke(new BasicStroke(2,BasicStroke.CAP_ROUND,BasicStroke.JOIN_BEVEL));
+//			g2.drawRoundRect(x , y, CELL_SIZE - 0, CELL_SIZE - 0, 3, 3);
+
 
 			//g2.setColor(new Color(192, 192, 192));
 			//g2.setStroke(new BasicStroke(3));
@@ -244,6 +258,15 @@ public class Cell
 			   (((Cell) other).marker   == this.marker))
 			return true;
 		return false;
+	}
+
+	public Color mixColor(Color startColor, Color modifier, double percent){
+		int r = (int)(startColor.getRed()*(1.0-percent) + modifier.getRed()*(percent));
+		int g = (int)(startColor.getGreen()*(1.0-percent) + modifier.getGreen()*(percent));
+		int b = (int)(startColor.getBlue()*(1.0-percent) + modifier.getBlue()*(percent));
+
+		Color output = new Color(r,g,b);
+		return output;
 	}
 
 	public String toString()
