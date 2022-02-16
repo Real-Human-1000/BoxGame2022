@@ -9,7 +9,7 @@ public class TerrainController {
         this.height = h;
         this.ffield = new FluidField(h, w);  // Jack tells me to keep this a square
 
-        // worleyTerrain();  // Good for islands
+        // worleyTerrain();  // For islands. Not great, but it's what we got
         polyTerrain();  // Good for rivers
         // snazzyDisplay();
     }
@@ -41,7 +41,7 @@ public class TerrainController {
                 if (distdist < 1)
                     distdist = distdist + 1;
 
-                terrain[y][x] = 1 / distdist;
+                terrain[y][x] = Math.min(Math.pow(1 / distdist, 0.35), 1);
             }
         }
     }
@@ -78,28 +78,31 @@ public class TerrainController {
 
         // Create some starting rivers
         for (int r = 0; r < 3; r++) {
-            // Starting point of river channel
+            // Set starting point of river channel and add water source
             double[] pos = {Math.random()*width, Math.random()*height/2};
+            ffield.addSource((int)pos[0], (int)pos[1], 0.5, 0, 5); // Does positive == down?
 
             while (terrain[(int)pos[1]][(int)pos[0]] > 0.15) {
                 if (terrain[(int)pos[1]][(int)pos[0]] > 0.2)
                     terrain[(int)pos[1]][(int)pos[0]] *= 0.75;
 
                 // Position of river mouth moves randomly, with a downward bias
+                // Vertical movement changes depending on terrain height
+                // We can assume that the terrain flattens out as it gets closer to sea near the bottom of the screen
+                pos[1] += (Math.random() + 1) * 0.5 * terrain[(int)pos[1]][(int)pos[0]];
                 pos[0] += 2 * (Math.random() - 0.5);
-                pos[1] += Math.random()/5 + 0.15;
+                // pos[1] += Math.random()/5 + 0.15;
 
+                // Make sure that the river doesn't go outside of the terrain array
                 if (pos[0] < 0) { pos[0] = 0; }
                 if (pos[0] > width-1) { pos[0] = width-1; }
                 if (pos[1] < 0) { pos[1] = 0; }
                 if (pos[1] > height-1) { pos[1] = height-1; }
             }
         }
-
     }
 
     public void update() {
-        System.out.println("hi");
         // Updates itself and the fluid field
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
@@ -109,7 +112,8 @@ public class TerrainController {
                 speed = Math.min(speed, 5);
 
                 // Total amount of sediment to deposit
-                double deltaTerrain = Math.min(-1 * Math.pow(speed - 2.5, 3) / 500, 1);
+                double deltaTerrain = Math.min(-1 * Math.pow(speed - 2.5, 3) / 500, ffield.getEarthDensity(x, y));
+                ffield.setEarthDensity(x, y, ffield.getEarthDensity(x, y) - deltaTerrain);
 
                 // Split up sediment among neighboring tiles
                 int numTiles = 5;
@@ -120,7 +124,7 @@ public class TerrainController {
                 if (x > 0) { terrain[y][x-1] += deltaTerrain/numTiles; }
                 if (x < width-1) { terrain[y][x+1] += deltaTerrain/numTiles; }
                 if (y > 0) { terrain[y-1][x] += deltaTerrain/numTiles; }
-                if (x < height+1) { terrain[y+1][x] += deltaTerrain/numTiles; }
+                if (y < height+1) { terrain[y+1][x] += deltaTerrain/numTiles; }
 
 
                 // Change wall status
@@ -138,19 +142,28 @@ public class TerrainController {
     }
 
     public double getTerrainAt(int x, int y) {
+        // Get the height of terrain at certain coordinates
         return terrain[x][y];
     }
 
     public double[][] getTerrain() {
+        // Get the entire terrain 2D array
         return terrain;
     }
 
     public double getFluidAt(int x, int y) {
+        // Get the density of fluid at certain coordinates
         return ffield.getDensity(x, y);
     }
 
     public double[] getFluid() {
+        // Get the entire density 1D array
         return ffield.getDensityArr();
+    }
+
+    public double getFluidEarthAt(int x, int y) {
+        // Get the amount of suspended sediment at certain coordinates
+        return ffield.getEarthDensity(x, y);
     }
 
     public void printArray(double[][] arr) {

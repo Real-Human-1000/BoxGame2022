@@ -9,7 +9,7 @@ public class GridDemoRunner
 
 //		StartHereFrame practiceApp = new StartHereFrame();
 		GridDemoFrame app = new GridDemoFrame();
-		// TerrainController t = new TerrainController(100, 100);
+		//TerrainController t = new TerrainController(100, 100);
 
 	}
 
