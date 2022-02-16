@@ -1,9 +1,4 @@
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Image;
+import java.awt.*;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.RescaleOp;
@@ -19,7 +14,7 @@ public class Cell
 	private static Image[][] scaledColorImages;
 	private static String[] filenames = {"BlueChip.png", "GreenChip.png", "PurpleChip.png", "RedChip.png", "YellowChip.png"};
 	private static String[] cellColors = {"Blue","Green","Purple","Red","Yellow"};
-	Color color;
+	Color color = Color.BLUE;
 	
 	private int colorID; // which background color should be displayed?
 	private int x,y; // screen coordinates of the top left corner
@@ -227,13 +222,16 @@ public class Cell
 			flipThread.setG(g);
 			flipThread.updateAnim();
 			//colorChanged = false;
-		}else {
-
+		}else{
+			System.out.println(colorChanged);
 			//g2.drawImage(colorImages[colorID], x, y, CELL_SIZE, CELL_SIZE, null);
 			//g2.drawImage(colorImages[colorID].getScaledInstance(12,12,2), x, y, CELL_SIZE - 2, CELL_SIZE - 2, null);
 
 			g2.setColor(color);
 			g2.fillRect(x,y,CELL_SIZE,CELL_SIZE);
+			Shape scg = new ShadedCellGraphics(CELL_SIZE,CELL_SIZE);
+			g2.setColor(Color.WHITE);
+			g2.draw(scg);
 
 //			g2.setColor(new Color(52,180,235));
 //			g2.setStroke(new BasicStroke(2,BasicStroke.CAP_ROUND,BasicStroke.JOIN_BEVEL));

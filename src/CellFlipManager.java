@@ -1,4 +1,5 @@
 import java.awt.*;
+import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.awt.image.RescaleOp;
 
@@ -34,6 +35,7 @@ public class CellFlipManager extends Thread{
         myCycles++;
         if(myCycles>=20) {
             myCell.setColorChanged(false);
+            System.out.println("done");
             CellFlipManager.currentThread().interrupt();
         }
     }
@@ -43,24 +45,25 @@ public class CellFlipManager extends Thread{
         Graphics2D g2 = (Graphics2D)g;
 
         g2.setColor(Color.BLACK);
-        //g2.fillRect(x, y, Cell.CELL_SIZE, Cell.CELL_SIZE);
+        g2.fillRect(x, y, Cell.CELL_SIZE, Cell.CELL_SIZE);
 
         int scaleFactor = Math.abs(10-myCycles);
         Image scaledImage;
-        Color drawColor;
+        Color drawColor = myCell.getMyColor();
         if(myCycles<10){
             drawColor = myColor;
             scaledImage = myCell.getScaledImageAtIndex(lastImageIndex,scaleFactor);
         }else{
-            drawColor = myCell.getMyColor();
+            //drawColor = myCell.getMyColor();
             scaledImage = myCell.getMyScaledImage(scaleFactor);//.getScaledInstance(imageWidth,(int)(imageHeight*scaleFactor),Image.SCALE_DEFAULT);
         }
 
+        AffineTransform graphicsTransform = g2.getTransform();
 
 
 
         //int scaledHeight = Math.min(scaledImage.getHeight(null),Cell.CELL_SIZE);
-        double sh = ((double)Cell.CELL_SIZE * Math.sin((Math.abs(10.0-myCycles)) * Math.PI / 18.0));
+        double scaleFac = Math.sin((Math.abs(10.0-myCycles)) * Math.PI / 19.0);
 
         int scaledHeight = (int)((double)Cell.CELL_SIZE * Math.sin((double)(myCycles-1) * Math.PI / 18.0));
        // System.out.println(sh);
@@ -83,18 +86,26 @@ public class CellFlipManager extends Thread{
 
             g2.setColor(drawColor);
             //g2.fillRect(x,y,Cell.CELL_SIZE,Cell.CELL_SIZE);
-            g2.fillRect(x,y+ Cell.CELL_SIZE / 2 - (int)sh / 2,Cell.CELL_SIZE,(int)sh);
+            //g2.fillRect(x+1,1+ y + Cell.CELL_SIZE / 2 - (int)sh / 2,Cell.CELL_SIZE-2,(int)sh-2);
+            //
+            //g2.translate(x+Cell.CELL_SIZE*scaleFac,y);
+            //g2.scale(1,scaleFac);
+            g2.fillRoundRect(x,y,Cell.CELL_SIZE-1,Cell.CELL_SIZE-1,1,1);
+            g2.translate(x,y);
+            Shape scg = new ShadedCellGraphics(Cell.CELL_SIZE,Cell.CELL_SIZE);
+            g2.setStroke(new BasicStroke(1,BasicStroke.CAP_ROUND,BasicStroke.JOIN_ROUND));
+            g2.setColor(drawColor.brighter());
+            //g2.setColor(Color.RED);
+            g2.draw(scg);
+            g2.setColor(drawColor.brighter().darker());
+            g2.transform(AffineTransform.getRotateInstance(Math.toRadians(180),
+                    ((double)Cell.CELL_SIZE-1) / 2.0, ((double)Cell.CELL_SIZE-1) / 2.0));
+            g2.draw(scg);
+            g2.setTransform(graphicsTransform);
+
+
 
 
         //}
-        /*
-        g2.setColor(new Color(192,192,192));
-        g2.setStroke(new BasicStroke(3));
-        g2.drawRoundRect(x+1, y+1, Cell.CELL_SIZE-4, Cell.CELL_SIZE-4, 8, 8);
-
-        g2.setColor(new Color(64,64,64));
-        g2.setStroke(new BasicStroke(2));
-        g2.drawRoundRect(x+1, y+1, Cell.CELL_SIZE-4, Cell.CELL_SIZE-4, 8, 8);
-        //}catch(){}*/
     }
 }
