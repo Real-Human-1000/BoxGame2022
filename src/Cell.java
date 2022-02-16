@@ -4,6 +4,7 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.RescaleOp;
 
@@ -18,6 +19,7 @@ public class Cell
 	private static Image[][] scaledColorImages;
 	private static String[] filenames = {"BlueChip.png", "GreenChip.png", "PurpleChip.png", "RedChip.png", "YellowChip.png"};
 	private static String[] cellColors = {"Blue","Green","Purple","Red","Yellow"};
+	Color color;
 	
 	private int colorID; // which background color should be displayed?
 	private int x,y; // screen coordinates of the top left corner
@@ -27,6 +29,7 @@ public class Cell
 
 	private CellFlipManager flipThread;
 	private boolean colorChanged = false;
+
 	
 	//=====================  CONSTRUCTORS =============================
 	public Cell()
@@ -108,18 +111,19 @@ public class Cell
 		return colorID;
 	}
 
-	public void setColorID(int colorID,double waterLevel)
+	public void setColorID(Color color,double waterLevel)
 	{
-		flipThread = new CellFlipManager(this,this.colorID);
+		flipThread = new CellFlipManager(this,this.color);
 		colorChanged = true;
-		this.colorID = colorID;
+		this.color = color;
+		//this.colorID = colorID;
 	}
 	/**
 	 * cycles the color forward one notch.
 	 */
 	public void cycleColorIDForward()
 	{
-		flipThread = new CellFlipManager(this,colorID);
+		//flipThread = new CellFlipManager(this,colorID);
 		colorChanged = true;
 		colorID = (colorID + 1) % filenames.length;
 
@@ -130,16 +134,22 @@ public class Cell
 	 */
 	public void cycleColorIDBackward()
 	{
-		flipThread = new CellFlipManager(this,colorID);
+		//flipThread = new CellFlipManager(this,colorID);
 		colorChanged = true;
 		colorID = (colorID+ (filenames.length-1)) %filenames.length;
 	}
 
-	public void setColorID(int colorID) {
-		flipThread = new CellFlipManager(this,colorID);
+	public void setColorID(Color color) {
+		flipThread = new CellFlipManager(this,this.color);
 		colorChanged = true;
-		this.colorID = colorID;
+		this.color = color;
+		//this.colorID = colorID;
 	}
+
+	public Color getMyColor() {
+		return color;
+	}
+
 
 	public int getX()
 	{
@@ -222,6 +232,8 @@ public class Cell
 			//g2.drawImage(colorImages[colorID], x, y, CELL_SIZE, CELL_SIZE, null);
 			//g2.drawImage(colorImages[colorID].getScaledInstance(12,12,2), x, y, CELL_SIZE - 2, CELL_SIZE - 2, null);
 
+			g2.setColor(color);
+			g2.fillRect(x,y,CELL_SIZE,CELL_SIZE);
 
 //			g2.setColor(new Color(52,180,235));
 //			g2.setStroke(new BasicStroke(2,BasicStroke.CAP_ROUND,BasicStroke.JOIN_BEVEL));
