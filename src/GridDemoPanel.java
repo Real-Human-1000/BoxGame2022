@@ -191,6 +191,7 @@ public class GridDemoPanel extends JPanel implements MouseListener, KeyListener
 	{
 		//theGrid[0][0].cycleColorIDBackward();
 		//System.out.println("step");
+		terrainController.stepAndUpdate();
 		repaint();
 	}
 	// ------------------------------- animation thread - internal class -------------------

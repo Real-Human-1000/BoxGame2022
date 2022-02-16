@@ -124,7 +124,7 @@ public class TerrainController {
                 if (x > 0) { terrain[y][x-1] += deltaTerrain/numTiles; }
                 if (x < width-1) { terrain[y][x+1] += deltaTerrain/numTiles; }
                 if (y > 0) { terrain[y-1][x] += deltaTerrain/numTiles; }
-                if (y < height+1) { terrain[y+1][x] += deltaTerrain/numTiles; }
+                if (y < height-1) { terrain[y+1][x] += deltaTerrain/numTiles; }
 
 
                 // Change wall status
