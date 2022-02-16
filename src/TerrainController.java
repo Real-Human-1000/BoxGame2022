@@ -10,14 +10,14 @@ public class TerrainController {
         this.ffield = new FluidField(h, w);  // Jack tells me to keep this a square
 
         // worleyTerrain();  // Good for islands
-        polyTerrain();  // Good for one river
-        snazzyDisplay();
-        update();
+        polyTerrain();  // Good for rivers
+        // snazzyDisplay();
     }
 
     public void worleyTerrain() {
         // Fills terrain with random doubles as a starting point for the simulation
         // Uses Worley Noise -- generates lots of random points and assigns random values based on distance to the nearest
+        // Worley noise algorithm taken from an older project I did, which was inspired by the worley noise wikipedia page
         terrain = new double[height][width];
 
         double[][] points = new double[(int)Math.sqrt(height*height + width*width)][2]; // (int)Math.sqrt(height*width)
@@ -49,6 +49,7 @@ public class TerrainController {
     public void polyTerrain() {
         // Fills terrain with random doubles as a starting point for the simulation
         // Uses noise generated from Voronoi polygons. Basically Worley noise again but cooler and better for our purposes
+        // Inspired by (but not taken from) http://www-cs-students.stanford.edu/~amitp/game-programming/polygon-map-generation/
         terrain = new double[height][width];
 
         double[][] points = new double[100][3];
@@ -75,9 +76,25 @@ public class TerrainController {
             }
         }
 
-//        for (int r = 0; r < 3; r++) {
-//            int[] pos = {Math.random()*width, Math.random()*height/2};
-//        }
+        // Create some starting rivers
+        for (int r = 0; r < 3; r++) {
+            // Starting point of river channel
+            double[] pos = {Math.random()*width, Math.random()*height/2};
+
+            while (terrain[(int)pos[1]][(int)pos[0]] > 0.15) {
+                if (terrain[(int)pos[1]][(int)pos[0]] > 0.2)
+                    terrain[(int)pos[1]][(int)pos[0]] *= 0.75;
+
+                // Position of river mouth moves randomly, with a downward bias
+                pos[0] += 2 * (Math.random() - 0.5);
+                pos[1] += Math.random()/5 + 0.15;
+
+                if (pos[0] < 0) { pos[0] = 0; }
+                if (pos[0] > width-1) { pos[0] = width-1; }
+                if (pos[1] < 0) { pos[1] = 0; }
+                if (pos[1] > height-1) { pos[1] = height-1; }
+            }
+        }
 
     }
 
@@ -87,15 +104,18 @@ public class TerrainController {
             for (int x = 0; x < width; x++) {
                 // Change terrain heights
                 double speed = Math.sqrt(Math.pow(ffield.getVx(x, y), 2) + Math.pow(ffield.getVy(x, y), 2));
-                // Min speed is 0, max speed is (realistically) 5
-                // Sqrt isn't efficient, but it makes the deltaTerrain algorithm simpler
+                // Min speed is 0, max speed is realistically 5, so we'll map to that range
+                speed = Math.min(speed, 5);
 
-                // double amount = ffield.getDensity(x, y);
-                // Maybe I'll use amount to calculate erosion later
-
+                // Total amount of sediment to deposit
                 double deltaTerrain = -1 * Math.pow(speed - 2.5, 3) / 500;
 
-                terrain[y][x] = Math.min(terrain[y][x] + deltaTerrain,1);
+                // Split up sediment among neighboring tiles
+                int numTiles = 5;
+                if (x == 0 || x == width - 1) { numTiles -= 1; }
+                if (y == 0 || y == height - 1) { numTiles -= 1; }
+
+
 
                 // Change wall status
                 ffield.setWall(x, y, terrain[y][x] > 0.4);  // "sea level"
@@ -125,10 +145,6 @@ public class TerrainController {
 
     public double[] getFluid() {
         return ffield.getDensityArr();
-    }
-
-    public Boolean getWallAt(int x, int y){
-        return ffield.getWall(x,y);
     }
 
     public void printArray(double[][] arr) {
