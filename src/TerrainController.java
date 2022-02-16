@@ -12,6 +12,7 @@ public class TerrainController {
         // worleyTerrain();  // Good for islands
         polyTerrain();  // Good for one river
         snazzyDisplay();
+        update();
     }
 
     public void worleyTerrain() {
@@ -74,10 +75,9 @@ public class TerrainController {
             }
         }
 
-        for (int r = 0; r < 3; r++) {
-            int[] pos = {(int)(Math.random()*width), (int)(Math.random()*height/2)};
-
-        }
+//        for (int r = 0; r < 3; r++) {
+//            int[] pos = {Math.random()*width, Math.random()*height/2};
+//        }
 
     }
 
@@ -125,6 +125,10 @@ public class TerrainController {
 
     public double[] getFluid() {
         return ffield.getDensityArr();
+    }
+
+    public Boolean getWallAt(int x, int y){
+        return ffield.getWall(x,y);
     }
 
     public void printArray(double[][] arr) {

@@ -11,6 +11,9 @@ public class FluidField {
     private double[] vx0;
     private double[] vy0;
 
+    private double[] earthDensity;
+    private double[] earthDensity0;
+
     private Boolean[] walls;
 
     private int h;
@@ -31,10 +34,12 @@ public class FluidField {
         density=new double[h*w];
         vx=new double[h*w];
         vy=new double[h*w];
+        earthDensity=new double[h*w];
 
         density0=new double[h*w];
         vx0=new double[h*w];
         vy0=new double[h*w];
+        earthDensity0=new double[h*w];
 
         walls=new Boolean[h*w];
 
@@ -52,7 +57,7 @@ public class FluidField {
 //                    vy[IX(i,j)] = Math.random() - 0.5;
 //                    walls[IX(i,j)] = false;
 //                } else {
-                density[IX(i,j)] = 0.0;
+                density[IX(i,j)] = 0.1;
                 vx[IX(i,j)] = 0;
                 vy[IX(i,j)] = 0;
                 walls[IX(i,j)] = false;
