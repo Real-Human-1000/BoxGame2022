@@ -8,8 +8,8 @@ public class GridDemoRunner
 		// switch the commenting between these lines when you are ready for the full program.
 
 //		StartHereFrame practiceApp = new StartHereFrame();
-		//GridDemoFrame app = new GridDemoFrame();
-		TerrainController t = new TerrainController(100, 100);
+		GridDemoFrame app = new GridDemoFrame();
+		// TerrainController t = new TerrainController(100, 100);
 
 	}
 

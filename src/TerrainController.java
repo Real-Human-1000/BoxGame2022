@@ -99,6 +99,7 @@ public class TerrainController {
     }
 
     public void update() {
+        System.out.println("hi");
         // Updates itself and the fluid field
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
@@ -108,13 +109,18 @@ public class TerrainController {
                 speed = Math.min(speed, 5);
 
                 // Total amount of sediment to deposit
-                double deltaTerrain = -1 * Math.pow(speed - 2.5, 3) / 500;
+                double deltaTerrain = Math.min(-1 * Math.pow(speed - 2.5, 3) / 500, 1);
 
                 // Split up sediment among neighboring tiles
                 int numTiles = 5;
                 if (x == 0 || x == width - 1) { numTiles -= 1; }
                 if (y == 0 || y == height - 1) { numTiles -= 1; }
 
+                terrain[y][x] += deltaTerrain/numTiles;
+                if (x > 0) { terrain[y][x-1] += deltaTerrain/numTiles; }
+                if (x < width-1) { terrain[y][x+1] += deltaTerrain/numTiles; }
+                if (y > 0) { terrain[y-1][x] += deltaTerrain/numTiles; }
+                if (x < height+1) { terrain[y+1][x] += deltaTerrain/numTiles; }
 
 
                 // Change wall status
