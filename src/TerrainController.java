@@ -80,7 +80,7 @@ public class TerrainController {
         for (int r = 0; r < 3; r++) {
             // Set starting point of river channel and add water source
             double[] pos = {Math.random()*width, Math.random()*height/2};
-            ffield.addSource((int)pos[0], (int)pos[1], 0.5, 0, 5); // Does positive == down?
+            ffield.addSource((int)pos[0], (int)pos[1], 0.1, 0, 5); // Does positive == down?
 
             while (terrain[(int)pos[1]][(int)pos[0]] > 0.15) {
                 if (terrain[(int)pos[1]][(int)pos[0]] > 0.2)
@@ -112,7 +112,7 @@ public class TerrainController {
                 speed = Math.min(speed, 5);
 
                 // Total amount of sediment to deposit
-                double deltaTerrain = Math.min(-1 * Math.pow(speed - 2.5, 3) / 500, ffield.getEarthDensity(x, y));
+                double deltaTerrain = Math.min(-1 * Math.pow(speed - 2.5, 3) / 5000, ffield.getEarthDensity(x, y));
                 ffield.setEarthDensity(x, y, ffield.getEarthDensity(x, y) - deltaTerrain);
 
                 // Split up sediment among neighboring tiles
