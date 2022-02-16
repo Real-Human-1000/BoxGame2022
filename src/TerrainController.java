@@ -95,7 +95,7 @@ public class TerrainController {
 
                 double deltaTerrain = -1 * Math.pow(speed - 2.5, 3) / 500;
 
-                terrain[y][x] = terrain[y][x] + deltaTerrain;
+                terrain[y][x] = Math.min(terrain[y][x] + deltaTerrain,1);
 
                 // Change wall status
                 ffield.setWall(x, y, terrain[y][x] > 0.4);  // "sea level"
