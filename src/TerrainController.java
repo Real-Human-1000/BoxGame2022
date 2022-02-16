@@ -111,6 +111,8 @@ public class TerrainController {
                 // Total amount of sediment to deposit
                 double deltaTerrain = Math.min(-1 * Math.pow(speed - 2.5, 3) / 500, 1);
 
+
+
                 // Split up sediment among neighboring tiles
                 int numTiles = 5;
                 if (x == 0 || x == width - 1) { numTiles -= 1; }
@@ -120,7 +122,7 @@ public class TerrainController {
                 if (x > 0) { terrain[y][x-1] += deltaTerrain/numTiles; }
                 if (x < width-1) { terrain[y][x+1] += deltaTerrain/numTiles; }
                 if (y > 0) { terrain[y-1][x] += deltaTerrain/numTiles; }
-                if (x < height+1) { terrain[y+1][x] += deltaTerrain/numTiles; }
+                if (y < height+1) { terrain[y+1][x] += deltaTerrain/numTiles; }
 
 
                 // Change wall status

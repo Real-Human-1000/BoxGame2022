@@ -61,6 +61,7 @@ public class FluidField {
                 vx[IX(i,j)] = 0;
                 vy[IX(i,j)] = 0;
                 walls[IX(i,j)] = false;
+                earthDensity[IX(i,j)] = 0;
                 //}
             }
         }
@@ -68,6 +69,7 @@ public class FluidField {
             density0[i]=density[i];
             vx0[i]=vx[i];
             vy0[i]=vy[i];
+            earthDensity0[i]=earthDensity[i];
         }
 
     }
@@ -75,6 +77,7 @@ public class FluidField {
     public void step(){
         vel_step ( N, vy, vx, vy0, vx0, visc, dt );
         dens_step ( N, density, density0, vy, vx, diff, dt );
+        dens_step ( N, earthDensity, earthDensity0, vy, vx, diff, dt );
         for (int i=0; i<sources.size(); i++){
             int x = sources.get(i).getX();
             int y = sources.get(i).getY();
@@ -263,6 +266,8 @@ public class FluidField {
     public void setDensity(int i, int j, double d){ density[IX(i,j)]=d; }
     public void setVx(int i, int j, double v){ vx[IX(i,j)]=v; }
     public void setVy(int i, int j, double v){ vy[IX(i,j)]=v; }
+    public void setEarthDensity(int i, int j, double d){ earthDensity[IX(i,j)]=d; }
+    public double getEarthDensity(int i, int j){ return earthDensity[IX(i,j)]; }
 
     public void addSource(int x, int y, double density, double vx, double vy){
         boolean found = false;
