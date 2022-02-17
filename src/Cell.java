@@ -1,4 +1,5 @@
 import java.awt.*;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.RescaleOp;
@@ -135,9 +136,13 @@ public class Cell
 	}
 
 	public void setColorID(Color color) {
-		flipThread = new CellFlipManager(this,this.color);
-		colorChanged = true;
-		this.color = color;
+		if(getColorDifferenceSQ(color,this.color)>900){
+			if (colorChanged == false) {
+				flipThread = new CellFlipManager(this, this.color);
+				colorChanged = true;
+			}
+			this.color = color;
+		}
 		//this.colorID = colorID;
 	}
 
@@ -213,25 +218,41 @@ public class Cell
 		isLive = b;
 	}
 	// =============================   DRAW SELF ================================
-	public void drawSelf(Graphics g)
+	public void drawSelf(Graphics g,double deltaTime,boolean performanceMode)
 	{
 		if (!isLive)
 			return;
 		Graphics2D g2 = (Graphics2D) g;
 		if(colorChanged){
 			flipThread.setG(g);
-			flipThread.updateAnim();
+			flipThread.updateAnim(deltaTime,performanceMode);
+
 			//colorChanged = false;
 		}else{
-			System.out.println(colorChanged);
+			flipThread = null;
 			//g2.drawImage(colorImages[colorID], x, y, CELL_SIZE, CELL_SIZE, null);
 			//g2.drawImage(colorImages[colorID].getScaledInstance(12,12,2), x, y, CELL_SIZE - 2, CELL_SIZE - 2, null);
 
+			AffineTransform graphicsTransform = g2.getTransform();
+
 			g2.setColor(color);
 			g2.fillRect(x,y,CELL_SIZE,CELL_SIZE);
-			Shape scg = new ShadedCellGraphics(CELL_SIZE,CELL_SIZE);
-			g2.setColor(Color.WHITE);
-			g2.draw(scg);
+
+			g2.fillRoundRect(x,y,CELL_SIZE-1,CELL_SIZE-1,1,1);
+
+			if(performanceMode==false) {
+				g2.translate(x, y);
+				Shape scg = new ShadedCellGraphics(CELL_SIZE, CELL_SIZE);
+				g2.setStroke(new BasicStroke(1, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+				g2.setColor(color.brighter());
+				g2.draw(scg);
+				g2.setColor(color.brighter().darker());
+				g2.transform(AffineTransform.getRotateInstance(Math.toRadians(180),
+						((double) CELL_SIZE - 1) / 2.0, ((double) CELL_SIZE - 1) / 2.0));
+				g2.draw(scg);
+				g2.setTransform(graphicsTransform);
+			}
+
 
 //			g2.setColor(new Color(52,180,235));
 //			g2.setStroke(new BasicStroke(2,BasicStroke.CAP_ROUND,BasicStroke.JOIN_BEVEL));
@@ -267,6 +288,24 @@ public class Cell
 		}
 	
 	}
+
+	public void drawDebug(Graphics g, Color waterCol, Color terrainCol){
+		if (!isLive)
+			return;
+		Graphics2D g2 = (Graphics2D) g;
+
+		g2.setColor(color);
+		g2.fillRect(x,y,CELL_SIZE/4,CELL_SIZE/4);
+		g2.setColor(waterCol);
+		g2.fillRect(x,y+CELL_SIZE/4,CELL_SIZE/4,CELL_SIZE/4);
+		g2.setColor(terrainCol);
+		g2.fillRect(x+CELL_SIZE/4,y,CELL_SIZE/4,CELL_SIZE/4);
+
+
+	}
+
+
+
 // ===================================  OVERRIDDEN OBJECT METHODS ==============================
 	public boolean equals(Object other)
 	{
@@ -297,6 +336,13 @@ public class Cell
 		int result = colorID * 137;
 		if (marker!=null) result += marker.hashCode();
 		return result;
+	}
+
+	//used in the color change
+	public int getColorDifferenceSQ(Color c1, Color c2){
+		return (int) (Math.pow(c1.getRed()-c2.getRed(),2)+
+						Math.pow(c1.getBlue()-c2.getBlue(),2)+
+						Math.pow(c1.getGreen()-c2.getGreen(),2));
 	}
 
 }

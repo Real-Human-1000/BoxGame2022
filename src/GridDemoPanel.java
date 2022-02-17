@@ -18,6 +18,8 @@ public class GridDemoPanel extends JPanel implements MouseListener, KeyListener
 	public GridDemoFrame myParent;
 	public TerrainController terrainController;
 	public int score;
+	public double deltaTime = 0;
+	public boolean performanceMode;
 	
 	public GridDemoPanel(GridDemoFrame parent)
 	{
@@ -55,9 +57,16 @@ public class GridDemoPanel extends JPanel implements MouseListener, KeyListener
 				if (terrainMap[r][c] >= 0.3){
 					theGrid[r][c].setColorID(new Color(64,(int)(255*terrainMap[r][c]),64));
 				}else{
-					theGrid[r][c].setColorID(new Color(0,50,(int)((terrainController.getFluidAt(c,r))*255)));
+					theGrid[r][c].setColorID(new Color(0,50,(int)((1-terrainController.getFluidAt(c,r))*255)));
 				}
-				theGrid[r][c].drawSelf(g);
+				theGrid[r][c].drawSelf(g,deltaTime,performanceMode);
+				try {
+					theGrid[r][c].drawDebug(g, new Color(0,0,Math.min(255,(int)((terrainController.getFluidAt(c,r))*255))),
+							new Color(64, (int) Math.min((255 * terrainController.getFluidEarthAt(c, r)), 255), 64));
+				}catch (IllegalArgumentException e){
+					System.out.println((int)(254* terrainController.getFluidEarthAt(c,r)));
+
+				}
 			}
 	}
 	
@@ -191,7 +200,12 @@ public class GridDemoPanel extends JPanel implements MouseListener, KeyListener
 	{
 		//theGrid[0][0].cycleColorIDBackward();
 		//System.out.println("step");
+		deltaTime = millisecondsSinceLastStep;
 		terrainController.stepAndUpdate();
+		performanceMode = false;
+		if (deltaTime>12){
+			performanceMode = true;
+		}
 		repaint();
 	}
 	// ------------------------------- animation thread - internal class -------------------
