@@ -2,12 +2,14 @@ public class WaterSource {
     private int x;
     private int y;
     private double density;
+    private double earthDensity;
     private double vx;
     private double vy;
-    public WaterSource(int x, int y, double density, double vx, double vy){
+    public WaterSource(int x, int y, double density, double earthDensity, double vx, double vy){
         this.x = x;
         this.y = y;
         this.density = density;
+        this.earthDensity = earthDensity;
         this.vx = vx;
         this.vy = vy;
     }
@@ -24,6 +26,8 @@ public class WaterSource {
     public void setDensity(double density) {
         this.density = density;
     }
+    public double getEarthDensity() {return earthDensity;}
+    public void setEarthDensity(double earthDensity) {this.earthDensity = earthDensity;}
     public double getVx() {
         return vx;
     }

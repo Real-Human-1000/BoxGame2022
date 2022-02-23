@@ -19,7 +19,7 @@ public class FluidField {
     private int h;
     private int w;
 
-    private double dt=0.000001;
+    private double dt=0.001;
     private double visc = 0.0001;
     private double diff = 0.0001;
     private int N;
@@ -57,7 +57,7 @@ public class FluidField {
 //                    vy[IX(i,j)] = Math.random() - 0.5;
 //                    walls[IX(i,j)] = false;
 //                } else {
-                density[IX(i,j)] = 0.0;
+                density[IX(i,j)] = 0.1;
                 vx[IX(i,j)] = 0;
                 vy[IX(i,j)] = 0;
                 walls[IX(i,j)] = false;
@@ -75,6 +75,13 @@ public class FluidField {
     }
 
     public void step(){
+        for(int i=0; i<walls.length; i++){
+            if(walls[i]){
+                density[i]=0;
+                vx[0]=0;
+                vy[0]=0;
+            }
+        }
         vel_step ( N, vy, vx, vy0, vx0, visc, dt );
         dens_step ( N, density, density0, vy, vx, diff, dt );
         dens_step ( N, earthDensity, earthDensity0, vy, vx, diff, dt );
@@ -82,6 +89,7 @@ public class FluidField {
             int x = sources.get(i).getX();
             int y = sources.get(i).getY();
             density[IX(x,y)]=sources.get(i).getDensity();
+            earthDensity[IX(x,y)]=sources.get(i).getEarthDensity();
             vx[IX(x,y)]=sources.get(i).getVx();
             vy[IX(x,y)]=sources.get(i).getVy();
         }
@@ -269,7 +277,7 @@ public class FluidField {
     public void setEarthDensity(int i, int j, double d){ earthDensity[IX(i,j)]=d; }
     public double getEarthDensity(int i, int j){ return earthDensity[IX(i,j)]; }
 
-    public void addSource(int x, int y, double density, double vx, double vy){
+    public void addSource(int x, int y, double density, double earthDensity, double vx, double vy){
         boolean found = false;
         for(int i=0; i<sources.size(); i++) {
             if (sources.get(i).getX() == x && sources.get(i).getY() == y) {
@@ -280,7 +288,7 @@ public class FluidField {
             }
         }
         if (!found) {
-            sources.add(new WaterSource(x, y, density, vx, vy));
+            sources.add(new WaterSource(x, y, density, earthDensity, vx, vy));
         }
     }
     public WaterSource getSource(int i){ return sources.get(i); }

@@ -13,7 +13,7 @@ public class TerrainController {
 
         //worleyTerrain();  // For islands. Not great, but it's what we got
         polyTerrain();  // Good for rivers
-        // snazzyDisplay();
+        //snazzyDisplay();
     }
 
     public void worleyTerrain() {
@@ -51,7 +51,7 @@ public class TerrainController {
             int x = (int)(Math.random()*width);
             int y = (int)(Math.random()*height);
 
-            ffield.addSource(x, y, 0.1, Math.random()*10-5, Math.random()*10-5);
+            //ffield.addSource(x, y, 0.1, Math.random()*10-5, Math.random()*10-5);
         }
     }
 
@@ -89,7 +89,7 @@ public class TerrainController {
         for (int r = 0; r < 3; r++) {
             // Set starting point of river channel and add water source
             double[] pos = {Math.random()*width, Math.random()*height/2};
-            ffield.addSource((int)pos[0], (int)pos[1], 0.1, 0, 5); // Does positive == down?
+            ffield.addSource((int)pos[0], (int)pos[1], 0.1, 0.001, 2, 0); // Does positive == down? probably
 
             while (terrain[(int)pos[1]][(int)pos[0]] > 0.15) {
                 if (terrain[(int)pos[1]][(int)pos[0]] > 0.2)
@@ -118,10 +118,10 @@ public class TerrainController {
                 // Change terrain heights
                 double speed = Math.sqrt(Math.pow(ffield.getVx(x, y), 2) + Math.pow(ffield.getVy(x, y), 2));
                 // Min speed is 0, max speed is realistically 5, so we'll map to that range
-                speed = Math.min(speed, 5);
+                speed = Math.min(speed, 2);
 
                 // Total amount of sediment to deposit
-                double deltaTerrain = Math.min(-1 * Math.pow(speed - 2.5, 3) / 5000 * ffield.getDensity(x, y) * 5, ffield.getEarthDensity(x, y));
+                double deltaTerrain = Math.min(-1 * Math.pow(speed - 1, 3) / 500 * ffield.getDensity(x, y) * 5, ffield.getEarthDensity(x, y));
                 ffield.setEarthDensity(x, y, ffield.getEarthDensity(x, y) - deltaTerrain);
 
                 // Split up sediment among neighboring tiles
@@ -138,8 +138,8 @@ public class TerrainController {
 
                 // Change wall status
                 ffield.setWall(x, y, terrain[y][x] > this.seaLevel);
-                ffield.setVx(x, y, ffield.getVx(x, y) - terrain[y][x] * ffield.getVx(x, y));
-                ffield.setVy(x, y, ffield.getVy(x, y) - terrain[y][x] * ffield.getVy(x, y));
+                ffield.setVx(x, y, ffield.getVx(x, y) - Math.min(terrain[y][x]*2,1) * ffield.getVx(x, y));
+                ffield.setVy(x, y, ffield.getVy(x, y) - Math.min(terrain[y][x]*2,1) * ffield.getVy(x, y));
             }
         }
     }

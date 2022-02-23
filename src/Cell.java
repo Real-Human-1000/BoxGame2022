@@ -349,7 +349,7 @@ public class Cell
 		g2.dispose();
 	}
 
-	public void drawDebug(Graphics g, Color waterCol, Color terrainCol){
+	public void drawDebug(Graphics g, Color waterCol, Color terrainCol, double vx, double vy){
 		if (!isLive)
 			return;
 		Graphics2D g2 = (Graphics2D) g;
@@ -360,7 +360,9 @@ public class Cell
 		g2.fillRect(x,y+CELL_SIZE/4,CELL_SIZE/4,CELL_SIZE/4);
 		g2.setColor(terrainCol);
 		g2.fillRect(x+CELL_SIZE/4,y,CELL_SIZE/4,CELL_SIZE/4);
-
+		g2.setColor(Color.red);
+		double w = Math.sqrt(vx*vx+vy*vy);
+		g2.drawLine(x,y,x+2*(int)(vx/w),y+2*(int)(vy/w));
 
 	}
 
