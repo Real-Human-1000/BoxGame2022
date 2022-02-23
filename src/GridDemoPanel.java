@@ -212,7 +212,7 @@ public class GridDemoPanel extends JPanel implements MouseListener, KeyListener
 		deltaTime = millisecondsSinceLastStep;
 		terrainController.stepAndUpdate();
 		performanceMode = false;
-		if (deltaTime>12){
+		if (deltaTime>=12){
 			performanceMode = true;
 		}
 		repaint();

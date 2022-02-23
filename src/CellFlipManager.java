@@ -33,7 +33,7 @@ public class CellFlipManager{
     //@Override
     public void updateAnim(double dt,boolean pMode) {
         drawSelf(pMode);
-        myCycles += dt/4.0;
+        myCycles += dt/2.0;
         if(myCycles>20) {
             myCell.setColorChanged(false);
             //System.out.println("done");
@@ -44,8 +44,8 @@ public class CellFlipManager{
     public void drawSelf(boolean pMode){
         Graphics2D g2 = (Graphics2D)g;
 
-        g2.setColor(Color.BLACK);
-        g2.fillRect(x, y, Cell.CELL_SIZE, Cell.CELL_SIZE);
+        //g2.setColor(Color.BLACK);
+        //g2.fillRect(x, y, Cell.CELL_SIZE, Cell.CELL_SIZE);
 
         //int scaleFactor = Math.abs(10-myCycles);
         Image scaledImage;
