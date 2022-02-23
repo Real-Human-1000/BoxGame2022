@@ -57,7 +57,7 @@ public class FluidField {
 //                    vy[IX(i,j)] = Math.random() - 0.5;
 //                    walls[IX(i,j)] = false;
 //                } else {
-                density[IX(i,j)] = 0.0;
+                density[IX(i,j)] = 0.1;
                 vx[IX(i,j)] = 0;
                 vy[IX(i,j)] = 0;
                 walls[IX(i,j)] = false;
