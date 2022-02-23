@@ -55,9 +55,9 @@ public class GridDemoPanel extends JPanel implements MouseListener, KeyListener
 		for (int r =0; r<NUM_ROWS; r++)
 			for (int c=0; c<NUM_COLS; c++) {
 				if (terrainMap[r][c] >= 0.3){
-					theGrid[r][c].setColorID(new Color(64,(int)(255*terrainMap[r][c]),64));
+					theGrid[r][c].setColorID(new Color(64,Math.min((int)(255*terrainMap[r][c]),255),64));
 				}else{
-					theGrid[r][c].setColorID(new Color(0,50,(int)((1-terrainController.getFluidAt(c,r))*255)));
+					theGrid[r][c].setColorID(new Color(0,50,Math.min((int)((1-terrainController.getFluidAt(c,r))*255),255)));
 				}
 				theGrid[r][c].drawSelf(g,deltaTime,performanceMode);
 				try {

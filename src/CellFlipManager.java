@@ -85,8 +85,9 @@ public class CellFlipManager{
               //      Cell.CELL_SIZE, scaledHeight, null);
 
             g2.setColor(drawColor);
-            g2.fillRoundRect(x,y + Cell.CELL_SIZE/2 - scaledHeight/2,Cell.CELL_SIZE-1,scaledHeight-1,1,1);
+
             if (pMode==false) {
+                g2.fillRoundRect(x,y + Cell.CELL_SIZE/2 - scaledHeight/2,Cell.CELL_SIZE-1,scaledHeight-1,1,1);
                 g2.translate(x, y + Cell.CELL_SIZE / 2 - scaledHeight / 2);
                 Shape scg = new ShadedCellGraphics(Cell.CELL_SIZE, scaledHeight);
                 g2.setStroke(new BasicStroke(1, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
@@ -97,6 +98,8 @@ public class CellFlipManager{
                         ((double) Cell.CELL_SIZE - 1) / 2.0, ((double) Cell.CELL_SIZE - 1) / 2.0));
                 g2.draw(scg);
                 g2.setTransform(graphicsTransform);
+            }else{
+                g2.fillRect(x,y + Cell.CELL_SIZE/2 - scaledHeight/2,Cell.CELL_SIZE-1,scaledHeight-1);
             }
 
 
