@@ -19,6 +19,7 @@ public class GridDemoPanel extends JPanel implements MouseListener, KeyListener
 	public int score;
 	public double deltaTime = 0;
 	public boolean performanceMode;
+	private boolean meatMode = false;
 	
 	public GridDemoPanel(GridDemoFrame parent)
 	{
@@ -59,30 +60,44 @@ public class GridDemoPanel extends JPanel implements MouseListener, KeyListener
 		for (int r =0; r<NUM_ROWS; r++)
 			for (int c=0; c<NUM_COLS; c++) {
 				theGrid[r][c].setMyGC(getGraphicsConfiguration());
-				if (terrainMap[r][c] >= terrainController.getSeaLevel()){
-					theGrid[r][c].setColorID(new Color(64,capColor(255*terrainMap[r][c]),64));
-				}else{
-					// theGrid[r][c].setColorID(new Color(0,50,Math.min((int)(terrainController.getFluidAt(c,r)*25500), 255)));
 
-					if (terrainController.getFluidAt(c,r) > 0) {
-						double earth = terrainController.getFluidEarthAt(c, r);
-						double fluid = terrainController.getFluidAt(c, r);
+				if (!meatMode) {
+					if (terrainMap[r][c] >= terrainController.getSeaLevel()) {
+						theGrid[r][c].setColorID(new Color(64, capColor(255 * terrainMap[r][c]), 64));
 
-						// An extra *10 has been added to all fluid levels to aid in visibility
-						Color mudColor = new Color(capColor(earth * 140 + 60 - fluid*10 * (earth * 50 + 64)),
-							capColor(160 * (1 - fluid*10) - 0.6 * 160 * (1 - fluid*10) * Math.pow(earth - 0.9, 2)),
-							capColor(220 - earth * 140 - fluid*10 * (140 - earth * 76)));
-						theGrid[r][c].setColorID(mudColor);
 					} else {
-						theGrid[r][c].setColorID(new Color(capColor(160 * terrainMap[r][c] + 48),
-								capColor(128 * terrainMap[r][c] + 32),
-								capColor(64 * terrainMap[r][c] + 16)));
+						// theGrid[r][c].setColorID(new Color(0,50,Math.min((int)(terrainController.getFluidAt(c,r)*25500), 255)));
+
+						if (terrainController.getFluidAt(c, r) > 0) {
+							double earth = terrainController.getFluidEarthAt(c, r);
+							double fluid = terrainController.getFluidAt(c, r);
+
+							// An extra *10 has been added to all fluid levels to aid in visibility
+							Color mudColor = new Color(capColor(earth * 140 + 60 - fluid * 10 * (earth * 50 + 64)),
+									capColor(160 * (1 - fluid * 10) - 0.6 * 160 * (1 - fluid * 10) * Math.pow(earth - 0.9, 2)),
+									capColor(220 - earth * 140 - fluid * 10 * (140 - earth * 76)));
+							theGrid[r][c].setColorID(mudColor);
+
+						} else {
+							theGrid[r][c].setColorID(new Color(capColor(160 * terrainMap[r][c] + 48),
+									capColor(128 * terrainMap[r][c] + 32),
+									capColor(64 * terrainMap[r][c] + 16)));
+						}
 					}
 
-
-					//System.out.println(c + ", " + r + " --> " + terrainController.getFluidAt(c,r));
+				} else {
+					if (terrainController.getFluidAt(c, r) > 0 && terrainMap[r][c] < terrainController.getSeaLevel()) {
+						theGrid[r][c].setColorID(new Color(capColor(255 * terrainController.getFluidEarthAt(c, r)),
+								capColor(5500 * terrainController.getFluidAt(c, r) + 200),
+								0));
+					} else {
+						theGrid[r][c].setColorID(new Color(capColor(Math.sqrt(55225 * terrainMap[r][c])),
+								capColor(227 * Math.pow(terrainMap[r][c], 2) + 10),
+								capColor(180 * Math.pow(terrainMap[r][c], 2) + 20)));
+					}
 				}
-				theGrid[r][c].drawSelf(g, deltaTime, performanceMode);
+
+				theGrid[r][c].drawSelf(g, deltaTime, true);
 			}
 	}
 	

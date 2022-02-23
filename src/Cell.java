@@ -311,7 +311,7 @@ public class Cell
 //					//g2.setTransform(graphicsTransform);
 				} else {
 					g2.fillRect(x, y, CELL_SIZE, CELL_SIZE);
-					System.out.println(deltaTime);
+					// System.out.println(deltaTime);
 				}
 
 //			g2.setColor(new Color(52,180,235));
