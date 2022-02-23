@@ -11,7 +11,7 @@ public class TerrainController {
         this.seaLevel = 0.3;
         this.ffield = new FluidField(h, w);  // Jack tells me to keep this a square
 
-        // worleyTerrain();  // For islands. Not great, but it's what we got
+        //worleyTerrain();  // For islands. Not great, but it's what we got
         polyTerrain();  // Good for rivers
         // snazzyDisplay();
     }
@@ -45,6 +45,13 @@ public class TerrainController {
 
                 terrain[y][x] = Math.min(Math.pow(1 / distdist, 0.35), 1);
             }
+        }
+
+        for (int w = 0; w < 3; w++) {
+            int x = (int)(Math.random()*width);
+            int y = (int)(Math.random()*height);
+
+            ffield.addSource(x, y, 0.1, Math.random()*10-5, Math.random()*10-5);
         }
     }
 
