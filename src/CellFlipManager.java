@@ -33,7 +33,7 @@ public class CellFlipManager{
     //@Override
     public void updateAnim(double dt,boolean pMode) {
         drawSelf(pMode);
-        myCycles += dt/2.0;
+        myCycles += dt/4.0;
         if(myCycles>20) {
             myCell.setColorChanged(false);
             //System.out.println("done");

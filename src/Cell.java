@@ -1,8 +1,6 @@
 import java.awt.*;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.RoundRectangle2D;
-import java.awt.image.BufferedImage;
-import java.awt.image.RescaleOp;
+import java.awt.image.VolatileImage;
 
 import javax.swing.ImageIcon;
 
@@ -25,8 +23,12 @@ public class Cell
 
 	private CellFlipManager flipThread;
 	private boolean colorChanged = false;
+	GraphicsConfiguration myGC = null;
 
-	
+	private VolatileImage myDrip; //the cell's current appearance, buffered for performance
+
+
+
 	//=====================  CONSTRUCTORS =============================
 	public Cell()
 	{
@@ -92,6 +94,7 @@ public class Cell
 		this((int)(Math.random()*filenames.length));
 		y = inRow*CELL_SIZE;
 		x = inCol*CELL_SIZE;
+
 	}
 	
 	public Cell(int cid, int inRow, int inCol, String inMarker, boolean disp)
@@ -100,6 +103,7 @@ public class Cell
 		colorID = cid;
 		marker = inMarker;
 		displayMarker = disp;
+
 	}
 	//=====================  ACCESSORS/MODIFIERS =============================
 	public int getColorID()
@@ -142,6 +146,7 @@ public class Cell
 				colorChanged = true;
 			}
 			this.color = color;
+			createDrip();
 		}
 		//this.colorID = colorID;
 	}
@@ -170,7 +175,11 @@ public class Cell
 	{
 		this.y = y;
 	}
-	
+
+	public void setMyGC(GraphicsConfiguration myGC) {
+		this.myGC = myGC;
+	}
+
 	public String getMarker()
 	{
 		return marker;
@@ -218,11 +227,57 @@ public class Cell
 		isLive = b;
 	}
 	// =============================   DRAW SELF ================================
+	private void createDrip(){
+		myDrip = myGC.createCompatibleVolatileImage(CELL_SIZE,CELL_SIZE);
+		restoreDrip();
+	}
+
+	private void restoreDrip(){
+		do{
+			if(myDrip.validate(myGC)==VolatileImage.IMAGE_INCOMPATIBLE){
+				myDrip = myGC.createCompatibleVolatileImage(CELL_SIZE,CELL_SIZE);
+			}
+			Graphics2D G = myDrip.createGraphics();
+			G.setColor(Color.BLACK);
+			G.fillRect(0,0,CELL_SIZE,CELL_SIZE);
+			G.setColor(color);
+			G.fillRoundRect(0, 0, CELL_SIZE - 1, CELL_SIZE - 1, 1, 1);
+			Shape scg = new ShadedCellGraphics(CELL_SIZE, CELL_SIZE);
+			G.setStroke(new BasicStroke(1, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+			G.setColor(color.brighter());
+			G.draw(scg);
+			G.setColor(color.brighter().darker());
+			G.transform(AffineTransform.getRotateInstance(Math.toRadians(180),
+				((double) CELL_SIZE - 1) / 2.0, ((double) CELL_SIZE - 1) / 2.0));
+			G.draw(scg);
+
+			G.dispose();
+		}while (myDrip.contentsLost());
+	}
+
+	private void drawMyDrip(Graphics g){
+		if(myDrip == null)
+			myDrip = myGC.createCompatibleVolatileImage(CELL_SIZE,CELL_SIZE);
+		do {
+			int returnCode = myDrip.validate(myGC);
+			if (returnCode == VolatileImage.IMAGE_RESTORED) {
+				// Contents need to be restored
+				restoreDrip();      // restore contents
+			} else if (returnCode == VolatileImage.IMAGE_INCOMPATIBLE) {
+				// old vImg doesn't work with new GraphicsConfig; re-create it
+				myDrip = myGC.createCompatibleVolatileImage(CELL_SIZE,CELL_SIZE);
+				restoreDrip();
+			}
+			g.drawImage(myDrip, x, y, null);
+		} while (myDrip.contentsLost());
+	}
+
+
 	public void drawSelf(Graphics g,double deltaTime,boolean performanceMode)
 	{
 		if (!isLive)
 			return;
-		Graphics2D g2 = (Graphics2D) g;
+		Graphics2D g2 = (Graphics2D)g.create();
 		if(colorChanged){
 			flipThread.setG(g);
 			flipThread.updateAnim(deltaTime,performanceMode);
@@ -239,20 +294,24 @@ public class Cell
 
 
 				if (performanceMode == false) {
-					AffineTransform graphicsTransform = g2.getTransform();
-					g2.fillRoundRect(x, y, CELL_SIZE - 1, CELL_SIZE - 1, 1, 1);
-					g2.translate(x, y);
-					Shape scg = new ShadedCellGraphics(CELL_SIZE, CELL_SIZE);
-					g2.setStroke(new BasicStroke(1, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-					g2.setColor(color.brighter());
-					g2.draw(scg);
-					g2.setColor(color.brighter().darker());
-					g2.transform(AffineTransform.getRotateInstance(Math.toRadians(180),
-							((double) CELL_SIZE - 1) / 2.0, ((double) CELL_SIZE - 1) / 2.0));
-					g2.draw(scg);
-					g2.setTransform(graphicsTransform);
+					//g2.drawImage(myDrip,x,y,CELL_SIZE,CELL_SIZE,null);
+					drawMyDrip(g2);
+//					AffineTransform graphicsTransform = g2.getTransform();
+//					g2.fillRoundRect(x, y, CELL_SIZE - 1, CELL_SIZE - 1, 1, 1);
+//					g2.translate(x, y);
+//					Shape scg = new ShadedCellGraphics(CELL_SIZE, CELL_SIZE);
+//					g2.setStroke(new BasicStroke(1, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+//					g2.setColor(color.brighter());
+//					g2.draw(scg);
+//					g2.setColor(color.brighter().darker());
+//					g2.transform(AffineTransform.getRotateInstance(Math.toRadians(180),
+//							((double) CELL_SIZE - 1) / 2.0, ((double) CELL_SIZE - 1) / 2.0));
+//					//scg = new ShadedCellGraphics(CELL_SIZE,CELL_SIZE,true);
+//					g2.draw(scg);
+//					//g2.setTransform(graphicsTransform);
 				} else {
 					g2.fillRect(x, y, CELL_SIZE, CELL_SIZE);
+					System.out.println(deltaTime);
 				}
 
 //			g2.setColor(new Color(52,180,235));
@@ -287,7 +346,7 @@ public class Cell
 			g2.setColor(Color.BLACK);
 			g2.drawString(marker, x+CELL_SIZE/2-7, y+CELL_SIZE/2+6);
 		}
-	
+		g2.dispose();
 	}
 
 	public void drawDebug(Graphics g, Color waterCol, Color terrainCol){

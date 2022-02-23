@@ -1,5 +1,4 @@
-import java.awt.Color;
-import java.awt.Graphics;
+import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -43,8 +42,9 @@ public class GridDemoPanel extends JPanel implements MouseListener, KeyListener
 	{
 		theGrid = new Cell[NUM_ROWS][NUM_COLS];
 		for (int r =0; r<NUM_ROWS; r++)
-			for (int c=0; c<NUM_COLS; c++)
+			for (int c=0; c<NUM_COLS; c++){
 				theGrid[r][c] = new Cell(r,c);
+				theGrid[r][c].setMyGC(getGraphicsConfiguration());}
 		score = 0;
 	}
 	
@@ -54,6 +54,7 @@ public class GridDemoPanel extends JPanel implements MouseListener, KeyListener
 		//g.clearRect(0,0,getWidth(),getHeight());
 		for (int r =0; r<NUM_ROWS; r++)
 			for (int c=0; c<NUM_COLS; c++) {
+				theGrid[r][c].setMyGC(getGraphicsConfiguration());
 				if (terrainMap[r][c] >= terrainController.getSeaLevel()){
 					theGrid[r][c].setColorID(new Color(64,Math.min((int)(255*terrainMap[r][c]), 255),64));
 				}else{
@@ -210,6 +211,7 @@ public class GridDemoPanel extends JPanel implements MouseListener, KeyListener
 		//theGrid[0][0].cycleColorIDBackward();
 		//System.out.println("step");
 		deltaTime = millisecondsSinceLastStep;
+
 		terrainController.stepAndUpdate();
 		performanceMode = false;
 		if (deltaTime>=12){
