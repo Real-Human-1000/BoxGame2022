@@ -63,9 +63,10 @@ public class GridDemoPanel extends JPanel implements MouseListener, KeyListener
 						double earth = terrainController.getFluidEarthAt(c, r);
 						double fluid = terrainController.getFluidAt(c, r);
 
-						Color mudColor = new Color((int)Math.max(Math.min(earth * 140 + 60 - fluid * (earth * 50 + 64), 255), 0),
-							(int)Math.max(Math.min(160 * (1 - fluid) - 0.6 * 160 * (1 - fluid) * Math.pow(earth - 0.9, 2), 255), 0),
-							(int)Math.max(Math.min(220 - earth * 140 - fluid * (140 - earth * 76), 255), 0));
+						// An extra *10 has been added to all fluid levels to aid in visibility
+						Color mudColor = new Color((int)Math.max(Math.min(earth * 140 + 60 - fluid*10 * (earth * 50 + 64), 255), 0),
+							(int)Math.max(Math.min(160 * (1 - fluid*10) - 0.6 * 160 * (1 - fluid*10) * Math.pow(earth - 0.9, 2), 255), 0),
+							(int)Math.max(Math.min(220 - earth * 140 - fluid*10 * (140 - earth * 76), 255), 0));
 						theGrid[r][c].setColorID(mudColor);
 					} else {
 						theGrid[r][c].setColorID(new Color(73, 40, 0));

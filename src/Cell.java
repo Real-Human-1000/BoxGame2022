@@ -15,7 +15,7 @@ public class Cell
 	private static Image[][] scaledColorImages;
 	private static String[] filenames = {"graphics.png", "GreenChip.png", "PurpleChip.png", "RedChip.png", "YellowChip.png"};
 	private static String[] cellColors = {"Blue","Green","Purple","Red","Yellow"};
-	Color color = Color.BLUE;
+	Color color = Color.BLACK;
 	
 	private int colorID; // which background color should be displayed?
 	private int x,y; // screen coordinates of the top left corner
