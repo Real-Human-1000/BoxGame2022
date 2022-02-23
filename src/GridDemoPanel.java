@@ -74,7 +74,7 @@ public class GridDemoPanel extends JPanel implements MouseListener, KeyListener
 
 					//System.out.println(c + ", " + r + " --> " + terrainController.getFluidAt(c,r));
 				}
-				theGrid[r][c].drawSelf(g, 0.01, true);
+				theGrid[r][c].drawSelf(g, deltaTime, true);
 			}
 	}
 	
