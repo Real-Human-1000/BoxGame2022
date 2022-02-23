@@ -29,7 +29,7 @@ public class GridDemoFrame extends JFrame
 		southPanel.add(Box.createHorizontalStrut(10));
 		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setVisible(true);	
+		setVisible(true);
 		thePanel.initiateAnimationLoop(); // uncomment this line if your program uses animation.
 	}
 	
