@@ -47,6 +47,10 @@ public class GridDemoPanel extends JPanel implements MouseListener, KeyListener
 				theGrid[r][c] = new Cell(r,c);
 		score = 0;
 	}
+
+	public int capColor(double in) {
+		return (int)Math.max(0, Math.min(in, 255));
+	}
 	
 	public void paintComponent(Graphics g)
 	{
@@ -55,7 +59,7 @@ public class GridDemoPanel extends JPanel implements MouseListener, KeyListener
 		for (int r =0; r<NUM_ROWS; r++)
 			for (int c=0; c<NUM_COLS; c++) {
 				if (terrainMap[r][c] >= terrainController.getSeaLevel()){
-					theGrid[r][c].setColorID(new Color(64,Math.min((int)(255*terrainMap[r][c]), 255),64));
+					theGrid[r][c].setColorID(new Color(64,capColor(255*terrainMap[r][c]),64));
 				}else{
 					// theGrid[r][c].setColorID(new Color(0,50,Math.min((int)(terrainController.getFluidAt(c,r)*25500), 255)));
 
@@ -64,12 +68,14 @@ public class GridDemoPanel extends JPanel implements MouseListener, KeyListener
 						double fluid = terrainController.getFluidAt(c, r);
 
 						// An extra *10 has been added to all fluid levels to aid in visibility
-						Color mudColor = new Color((int)Math.max(Math.min(earth * 140 + 60 - fluid*10 * (earth * 50 + 64), 255), 0),
-							(int)Math.max(Math.min(160 * (1 - fluid*10) - 0.6 * 160 * (1 - fluid*10) * Math.pow(earth - 0.9, 2), 255), 0),
-							(int)Math.max(Math.min(220 - earth * 140 - fluid*10 * (140 - earth * 76), 255), 0));
+						Color mudColor = new Color(capColor(earth * 140 + 60 - fluid*10 * (earth * 50 + 64)),
+							capColor(160 * (1 - fluid*10) - 0.6 * 160 * (1 - fluid*10) * Math.pow(earth - 0.9, 2)),
+							capColor(220 - earth * 140 - fluid*10 * (140 - earth * 76)));
 						theGrid[r][c].setColorID(mudColor);
 					} else {
-						theGrid[r][c].setColorID(new Color(73, 40, 0));
+						theGrid[r][c].setColorID(new Color(capColor(160 * terrainMap[r][c] + 48),
+								capColor(128 * terrainMap[r][c] + 32),
+								capColor(64 * terrainMap[r][c] + 16)));
 					}
 
 
