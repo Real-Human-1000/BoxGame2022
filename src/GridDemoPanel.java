@@ -54,19 +54,27 @@ public class GridDemoPanel extends JPanel implements MouseListener, KeyListener
 		//g.clearRect(0,0,getWidth(),getHeight());
 		for (int r =0; r<NUM_ROWS; r++)
 			for (int c=0; c<NUM_COLS; c++) {
-				if (terrainMap[r][c] >= 0.3){
-					theGrid[r][c].setColorID(new Color(64,Math.min((int)(255*terrainMap[r][c]),255),64));
+				if (terrainMap[r][c] >= terrainController.getSeaLevel()){
+					theGrid[r][c].setColorID(new Color(64,Math.min((int)(255*terrainMap[r][c]), 255),64));
 				}else{
-					theGrid[r][c].setColorID(new Color(0,50,Math.min((int)((1-terrainController.getFluidAt(c,r))*255),255)));
-				}
-				theGrid[r][c].drawSelf(g,deltaTime,performanceMode);
-				try {
-					theGrid[r][c].drawDebug(g, new Color(0,0,Math.min(255,(int)((terrainController.getFluidAt(c,r))*255))),
-							new Color(64, (int) Math.min((255 * terrainController.getFluidEarthAt(c, r)), 255), 64));
-				}catch (IllegalArgumentException e){
-					System.out.println((int)(254* terrainController.getFluidEarthAt(c,r)));
+					// theGrid[r][c].setColorID(new Color(0,50,Math.min((int)(terrainController.getFluidAt(c,r)*25500), 255)));
 
+					if (terrainController.getFluidAt(c,r) > 0) {
+						double earth = terrainController.getFluidEarthAt(c, r);
+						double fluid = terrainController.getFluidAt(c, r);
+
+						Color mudColor = new Color((int)Math.max(Math.min(earth * 140 + 60 - fluid * (earth * 50 + 64), 255), 0),
+							(int)Math.max(Math.min(160 * (1 - fluid) - 0.6 * 160 * (1 - fluid) * Math.pow(earth - 0.9, 2), 255), 0),
+							(int)Math.max(Math.min(220 - earth * 140 - fluid * (140 - earth * 76), 255), 0));
+						theGrid[r][c].setColorID(mudColor);
+					} else {
+						theGrid[r][c].setColorID(new Color(73, 40, 0));
+					}
+
+
+					//System.out.println(c + ", " + r + " --> " + terrainController.getFluidAt(c,r));
 				}
+				theGrid[r][c].drawSelf(g, 0.01, true);
 			}
 	}
 	

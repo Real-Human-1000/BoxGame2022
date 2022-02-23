@@ -3,10 +3,12 @@ public class TerrainController {
     int width, height;
     private FluidField ffield;
     private double[][] terrain;
+    private double seaLevel;
 
     public TerrainController(int w, int h) {
         this.width = w;
         this.height = h;
+        this.seaLevel = 0.3;
         this.ffield = new FluidField(h, w);  // Jack tells me to keep this a square
 
         // worleyTerrain();  // For islands. Not great, but it's what we got
@@ -84,13 +86,13 @@ public class TerrainController {
 
             while (terrain[(int)pos[1]][(int)pos[0]] > 0.15) {
                 if (terrain[(int)pos[1]][(int)pos[0]] > 0.2)
-                    terrain[(int)pos[1]][(int)pos[0]] *= 0.75;
+                    terrain[(int)pos[1]][(int)pos[0]] = 0.2; // *= 0.75;
 
                 // Position of river mouth moves randomly, with a downward bias
                 // Vertical movement changes depending on terrain height
                 // We can assume that the terrain flattens out as it gets closer to sea near the bottom of the screen
                 pos[1] += (Math.random() + 1) * 0.5 * terrain[(int)pos[1]][(int)pos[0]];
-                pos[0] += 2 * (Math.random() - 0.5);
+                pos[0] += 1.1 * (Math.random() - 0.5);
                 // pos[1] += Math.random()/5 + 0.15;
 
                 // Make sure that the river doesn't go outside of the terrain array
@@ -112,13 +114,13 @@ public class TerrainController {
                 speed = Math.min(speed, 5);
 
                 // Total amount of sediment to deposit
-                double deltaTerrain = Math.min(-1 * Math.pow(speed - 2.5, 3) / 5000, ffield.getEarthDensity(x, y));
+                double deltaTerrain = Math.min(-1 * Math.pow(speed - 2.5, 3) / 5000 * ffield.getDensity(x, y) * 5, ffield.getEarthDensity(x, y));
                 ffield.setEarthDensity(x, y, ffield.getEarthDensity(x, y) - deltaTerrain);
 
                 // Split up sediment among neighboring tiles
                 int numTiles = 5;
-                if (x == 0 || x == width - 1) { numTiles -= 1; }
-                if (y == 0 || y == height - 1) { numTiles -= 1; }
+                if (x == 0 || x == width - 1) { numTiles -= 1; } // Left or right side
+                if (y == 0 || y == height - 1) { numTiles -= 1; } // Top or bottom
 
                 terrain[y][x] += deltaTerrain/numTiles;
                 if (x > 0) { terrain[y][x-1] += deltaTerrain/numTiles; }
@@ -128,7 +130,7 @@ public class TerrainController {
 
 
                 // Change wall status
-                ffield.setWall(x, y, terrain[y][x] > 0.4);  // "sea level"
+                ffield.setWall(x, y, terrain[y][x] > this.seaLevel);
                 ffield.setVx(x, y, ffield.getVx(x, y) - terrain[y][x] * ffield.getVx(x, y));
                 ffield.setVy(x, y, ffield.getVy(x, y) - terrain[y][x] * ffield.getVy(x, y));
             }
@@ -164,6 +166,10 @@ public class TerrainController {
     public double getFluidEarthAt(int x, int y) {
         // Get the amount of suspended sediment at certain coordinates
         return ffield.getEarthDensity(x, y);
+    }
+
+    public double getSeaLevel() {
+        return this.seaLevel;
     }
 
     public void printArray(double[][] arr) {
