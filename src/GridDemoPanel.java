@@ -62,27 +62,33 @@ public class GridDemoPanel extends JPanel implements MouseListener, KeyListener
 				theGrid[r][c].setMyGC(getGraphicsConfiguration());
 
 				if (!meatMode) {
-					if (terrainMap[r][c] >= terrainController.getSeaLevel()) {
-						theGrid[r][c].setColorID(new Color(64, capColor(255 * terrainMap[r][c]), 64));
+//					if (terrainMap[r][c] >= terrainController.getSeaLevel()) {
+//						theGrid[r][c].setColorID(new Color(64, capColor(255 * terrainMap[r][c]), 64));
+//
+//					} else {
+//						// theGrid[r][c].setColorID(new Color(0,50,Math.min((int)(terrainController.getFluidAt(c,r)*25500), 255)));
+//
+//						if (terrainController.getFluidAt(c, r) > 0) {
+//							double earth = terrainController.getFluidEarthAt(c, r);
+//							double fluid = terrainController.getFluidAt(c, r);
+//
+//							Color mudColor = new Color(capColor(earth * 140 + 60 - fluid * (earth * 50 + 64)),
+//									capColor(160 * (1 - fluid) - 0.6 * 160 * (1 - fluid) * Math.pow(earth - 0.9, 2)),
+//									capColor(220 - earth * 140 - fluid * (140 - earth * 76)));
+//							theGrid[r][c].setColorID(mudColor);
+//
+//						} else {
+//							theGrid[r][c].setColorID(new Color(capColor(160 * terrainMap[r][c] + 48),
+//									capColor(128 * terrainMap[r][c] + 32),
+//									capColor(64 * terrainMap[r][c] + 16)));
+//						}
+//					}
 
-					} else {
-						// theGrid[r][c].setColorID(new Color(0,50,Math.min((int)(terrainController.getFluidAt(c,r)*25500), 255)));
-
-						if (terrainController.getFluidAt(c, r) > 0) {
-							double earth = terrainController.getFluidEarthAt(c, r);
-							double fluid = terrainController.getFluidAt(c, r);
-
-							Color mudColor = new Color(capColor(earth * 140 + 60 - fluid * (earth * 50 + 64)),
-									capColor(160 * (1 - fluid) - 0.6 * 160 * (1 - fluid) * Math.pow(earth - 0.9, 2)),
-									capColor(220 - earth * 140 - fluid * (140 - earth * 76)));
-							theGrid[r][c].setColorID(mudColor);
-
-						} else {
-							theGrid[r][c].setColorID(new Color(capColor(160 * terrainMap[r][c] + 48),
-									capColor(128 * terrainMap[r][c] + 32),
-									capColor(64 * terrainMap[r][c] + 16)));
-						}
-					}
+					theGrid[r][c].setColorID(new Color (
+							capColor(terrainController.getFluidEarthAt(c, r) * 255),
+							capColor(terrainMap[r][c] * 255),
+							capColor(terrainController.getFluidAt(c, r) * 255 * 10)
+					));
 
 				} else {
 					if (terrainController.getFluidAt(c, r) > 0 && terrainMap[r][c] < terrainController.getSeaLevel()) {
