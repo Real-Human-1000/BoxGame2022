@@ -58,7 +58,7 @@ public class CellFlipManager{
             //scaledImage = myCell.getMyScaledImage(scaleFactor);//.getScaledInstance(imageWidth,(int)(imageHeight*scaleFactor),Image.SCALE_DEFAULT);
         }
 
-        AffineTransform graphicsTransform = g2.getTransform();
+        //AffineTransform graphicsTransform = g2.getTransform();
 
 
 
@@ -88,16 +88,16 @@ public class CellFlipManager{
 
             if (pMode==false) {
                 g2.fillRoundRect(x,y + Cell.CELL_SIZE/2 - scaledHeight/2,Cell.CELL_SIZE-1,scaledHeight-1,1,1);
-                g2.translate(x, y + Cell.CELL_SIZE / 2 - scaledHeight / 2);
+                /*g2.translate(x, y + Cell.CELL_SIZE / 2 - scaledHeight / 2);
                 Shape scg = new ShadedCellGraphics(Cell.CELL_SIZE, scaledHeight);
                 g2.setStroke(new BasicStroke(1, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
                 g2.setColor(drawColor.brighter());
                 g2.draw(scg);
-                g2.setColor(drawColor.brighter().darker());
+                g2.setColor(drawColor.darker());
                 g2.transform(AffineTransform.getRotateInstance(Math.toRadians(180),
                         ((double) Cell.CELL_SIZE - 1) / 2.0, ((double) Cell.CELL_SIZE - 1) / 2.0));
                 g2.draw(scg);
-                g2.setTransform(graphicsTransform);
+                g2.setTransform(graphicsTransform);*/
             }else{
                 g2.fillRect(x,y + Cell.CELL_SIZE/2 - scaledHeight/2,Cell.CELL_SIZE-1,scaledHeight-1);
             }

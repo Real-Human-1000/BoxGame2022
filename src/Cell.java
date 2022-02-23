@@ -229,30 +229,31 @@ public class Cell
 
 			//colorChanged = false;
 		}else{
-			flipThread = null;
-			//g2.drawImage(colorImages[colorID], x, y, CELL_SIZE, CELL_SIZE, null);
-			//g2.drawImage(colorImages[colorID].getScaledInstance(12,12,2), x, y, CELL_SIZE - 2, CELL_SIZE - 2, null);
+				flipThread = null;
+				//g2.drawImage(colorImages[colorID], x, y, CELL_SIZE, CELL_SIZE, null);
+				//g2.drawImage(colorImages[colorID].getScaledInstance(12,12,2), x, y, CELL_SIZE - 2, CELL_SIZE - 2, null);
 
-			AffineTransform graphicsTransform = g2.getTransform();
 
-			g2.setColor(color);
-			g2.fillRect(x,y,CELL_SIZE,CELL_SIZE);
+				g2.setColor(color);
+				//g2.fillRect(x,y,CELL_SIZE,CELL_SIZE);
 
-			g2.fillRoundRect(x,y,CELL_SIZE-1,CELL_SIZE-1,1,1);
 
-			if(performanceMode==false) {
-				g2.translate(x, y);
-				Shape scg = new ShadedCellGraphics(CELL_SIZE, CELL_SIZE);
-				g2.setStroke(new BasicStroke(1, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-				g2.setColor(color.brighter());
-				g2.draw(scg);
-				g2.setColor(color.brighter().darker());
-				g2.transform(AffineTransform.getRotateInstance(Math.toRadians(180),
-						((double) CELL_SIZE - 1) / 2.0, ((double) CELL_SIZE - 1) / 2.0));
-				g2.draw(scg);
-				g2.setTransform(graphicsTransform);
-			}
-
+				if (performanceMode == false) {
+					AffineTransform graphicsTransform = g2.getTransform();
+					g2.fillRoundRect(x, y, CELL_SIZE - 1, CELL_SIZE - 1, 1, 1);
+					g2.translate(x, y);
+					Shape scg = new ShadedCellGraphics(CELL_SIZE, CELL_SIZE);
+					g2.setStroke(new BasicStroke(1, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+					g2.setColor(color.brighter());
+					g2.draw(scg);
+					g2.setColor(color.brighter().darker());
+					g2.transform(AffineTransform.getRotateInstance(Math.toRadians(180),
+							((double) CELL_SIZE - 1) / 2.0, ((double) CELL_SIZE - 1) / 2.0));
+					g2.draw(scg);
+					g2.setTransform(graphicsTransform);
+				} else {
+					g2.fillRect(x, y, CELL_SIZE, CELL_SIZE);
+				}
 
 //			g2.setColor(new Color(52,180,235));
 //			g2.setStroke(new BasicStroke(2,BasicStroke.CAP_ROUND,BasicStroke.JOIN_BEVEL));
