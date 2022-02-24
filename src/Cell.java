@@ -26,6 +26,9 @@ public class Cell
 	GraphicsConfiguration myGC = null;
 
 	private VolatileImage myDrip; //the cell's current appearance, buffered for performance
+	private double millisSinceLastFlip = 0;//keeps cells from flipping too often.
+
+	int lastTileStatus = 0;
 
 
 
@@ -111,42 +114,17 @@ public class Cell
 		return colorID;
 	}
 
-	public void setColorID(Color color,double waterLevel)
-	{
-		flipThread = new CellFlipManager(this,this.color);
-		colorChanged = true;
-		this.color = color;
-		//this.colorID = colorID;
-	}
-	/**
-	 * cycles the color forward one notch.
-	 */
-	public void cycleColorIDForward()
-	{
-		//flipThread = new CellFlipManager(this,colorID);
-		colorChanged = true;
-		colorID = (colorID + 1) % filenames.length;
-
-	}
-
-	/**
-	 * cycles the color backward one notch.
-	 */
-	public void cycleColorIDBackward()
-	{
-		//flipThread = new CellFlipManager(this,colorID);
-		colorChanged = true;
-		colorID = (colorID+ (filenames.length-1)) %filenames.length;
-	}
-
 	public void setColorID(Color color) {
-		if(getColorDifferenceSQ(color,this.color)>900){
+		if(getGreatestColorDifference(color,this.color)>50){//getColorDifferenceSQ(color,this.color)>2500){
 			if (colorChanged == false) {
 				flipThread = new CellFlipManager(this, this.color);
 				colorChanged = true;
+
 			}
+			millisSinceLastFlip = 0;
 			this.color = color;
-			createDrip();
+			//if(!performanceMode)
+			//createDrip();
 		}
 		//this.colorID = colorID;
 	}
@@ -155,10 +133,13 @@ public class Cell
 		return color;
 	}
 
-
 	public int getX()
 	{
 		return x;
+	}
+
+	public Color getColor() {
+		return color;
 	}
 
 	public void setX(int x)
@@ -227,7 +208,7 @@ public class Cell
 		isLive = b;
 	}
 	// =============================   DRAW SELF ================================
-	private void createDrip(){
+	public void createDrip(){
 		myDrip = myGC.createCompatibleVolatileImage(CELL_SIZE,CELL_SIZE);
 		restoreDrip();
 	}
@@ -256,20 +237,30 @@ public class Cell
 	}
 
 	private void drawMyDrip(Graphics g){
+		boolean dripRestored = false;
+		int attemptsToRestore = 2;
 		if(myDrip == null)
 			myDrip = myGC.createCompatibleVolatileImage(CELL_SIZE,CELL_SIZE);
 		do {
 			int returnCode = myDrip.validate(myGC);
 			if (returnCode == VolatileImage.IMAGE_RESTORED) {
 				// Contents need to be restored
-				restoreDrip();      // restore contents
+				restoreDrip();// restore contents
+				dripRestored = true;
+				attemptsToRestore+=1;
 			} else if (returnCode == VolatileImage.IMAGE_INCOMPATIBLE) {
 				// old vImg doesn't work with new GraphicsConfig; re-create it
 				myDrip = myGC.createCompatibleVolatileImage(CELL_SIZE,CELL_SIZE);
 				restoreDrip();
+				dripRestored = true;
+				attemptsToRestore+=1;
 			}
-			g.drawImage(myDrip, x, y, null);
-		} while (myDrip.contentsLost());
+			if(dripRestored){
+				g.setColor(color);
+				g.fillRoundRect(x,y,CELL_SIZE,CELL_SIZE,2,2);}
+			else
+				g.drawImage(myDrip, x, y, null);
+		} while (myDrip.contentsLost()&&attemptsToRestore<30);
 	}
 
 
@@ -278,10 +269,10 @@ public class Cell
 		if (!isLive)
 			return;
 		Graphics2D g2 = (Graphics2D)g.create();
+		millisSinceLastFlip+= deltaTime;
 		if(colorChanged){
 			flipThread.setG(g);
 			flipThread.updateAnim(deltaTime,performanceMode);
-
 			//colorChanged = false;
 		}else{
 				flipThread = null;
@@ -405,6 +396,12 @@ public class Cell
 		return (int) (Math.pow(c1.getRed()-c2.getRed(),2)+
 						Math.pow(c1.getBlue()-c2.getBlue(),2)+
 						Math.pow(c1.getGreen()-c2.getGreen(),2));
+	}
+	public int getGreatestColorDifference(Color c1, Color c2){
+		int greatestDiff = Math.abs(c1.getBlue()-c2.getBlue());
+		greatestDiff = Math.max(Math.abs(c1.getRed()-c2.getRed()),greatestDiff);
+		greatestDiff = Math.max(Math.abs(c1.getGreen()-c2.getGreen()),greatestDiff);
+		return greatestDiff;
 	}
 
 }

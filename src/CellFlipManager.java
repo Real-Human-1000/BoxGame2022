@@ -7,7 +7,6 @@ public class CellFlipManager{
     int x,y,imageWidth,imageHeight,lastImageIndex;
     Cell myCell;
     Graphics g;
-    double waterLevel = 0.5;
     Color myColor;
     double myCycles;
 
@@ -28,14 +27,16 @@ public class CellFlipManager{
         this.g = g;
     }
 
-    public void setWaterLevel(double wl){waterLevel=wl;}
-
     //@Override
     public void updateAnim(double dt,boolean pMode) {
         drawSelf(pMode);
         myCycles += dt/4.0;
         if(myCycles>20) {
             myCell.setColorChanged(false);
+            if(!pMode)
+            myCell.createDrip();
+
+
             //System.out.println("done");
         }
     }

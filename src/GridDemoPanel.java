@@ -19,7 +19,7 @@ public class GridDemoPanel extends JPanel implements MouseListener, KeyListener
 	public int score;
 	public double deltaTime = 0;
 	public boolean performanceMode;
-	private int palette = 0;
+	private int palette = 1;
 	// 0 = direct, 1 = mud, 2 = meat,
 	// 3 = sediment, 4 = terrain, 5 = water
 	// 6 = coast
@@ -136,7 +136,7 @@ public class GridDemoPanel extends JPanel implements MouseListener, KeyListener
 					}
 				}
 
-				theGrid[r][c].drawSelf(g, deltaTime, true);
+				theGrid[r][c].drawSelf(g, deltaTime, performanceMode);
 			}
 	}
 	
