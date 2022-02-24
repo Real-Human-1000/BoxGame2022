@@ -19,7 +19,10 @@ public class GridDemoPanel extends JPanel implements MouseListener, KeyListener
 	public int score;
 	public double deltaTime = 0;
 	public boolean performanceMode;
-	private boolean meatMode = false;
+	private int palette = 0;
+	// 0 = direct, 1 = mud, 2 = meat,
+	// 3 = sediment, 4 = terrain, 5 = water
+	// 6 = coast
 	
 	public GridDemoPanel(GridDemoFrame parent)
 	{
@@ -61,36 +64,43 @@ public class GridDemoPanel extends JPanel implements MouseListener, KeyListener
 			for (int c=0; c<NUM_COLS; c++) {
 				theGrid[r][c].setMyGC(getGraphicsConfiguration());
 
-				if (!meatMode) {
-//					if (terrainMap[r][c] >= terrainController.getSeaLevel()) {
-//						theGrid[r][c].setColorID(new Color(64, capColor(255 * terrainMap[r][c]), 64));
-//
-//					} else {
-//						// theGrid[r][c].setColorID(new Color(0,50,Math.min((int)(terrainController.getFluidAt(c,r)*25500), 255)));
-//
-//						if (terrainController.getFluidAt(c, r) > 0) {
-//							double earth = terrainController.getFluidEarthAt(c, r);
-//							double fluid = terrainController.getFluidAt(c, r);
-//
-//							Color mudColor = new Color(capColor(earth * 140 + 60 - fluid * (earth * 50 + 64)),
-//									capColor(160 * (1 - fluid) - 0.6 * 160 * (1 - fluid) * Math.pow(earth - 0.9, 2)),
-//									capColor(220 - earth * 140 - fluid * (140 - earth * 76)));
-//							theGrid[r][c].setColorID(mudColor);
-//
-//						} else {
-//							theGrid[r][c].setColorID(new Color(capColor(160 * terrainMap[r][c] + 48),
-//									capColor(128 * terrainMap[r][c] + 32),
-//									capColor(64 * terrainMap[r][c] + 16)));
-//						}
-//					}
-
+				if (palette == 0) {
+					// Direct
 					theGrid[r][c].setColorID(new Color (
 							capColor(terrainController.getFluidEarthAt(c, r) * 255),
 							capColor(terrainMap[r][c] * 255),
 							capColor(terrainController.getFluidAt(c, r) * 255 * 10)
 					));
+				}
 
-				} else {
+				if (palette == 1) {
+					// Mud
+					if (terrainMap[r][c] >= terrainController.getSeaLevel()) {
+						theGrid[r][c].setColorID(new Color(64, capColor(255 * terrainMap[r][c]), 64));
+
+					} else {
+						// theGrid[r][c].setColorID(new Color(0,50,Math.min((int)(terrainController.getFluidAt(c,r)*25500), 255)));
+
+						if (terrainController.getFluidAt(c, r) > 0) {
+							double earth = terrainController.getFluidEarthAt(c, r);
+							double fluid = terrainController.getFluidAt(c, r);
+
+							Color mudColor = new Color(capColor(earth * 140 + 60 - fluid * (earth * 50 + 64)),
+									capColor(160 * (1 - fluid) - 0.6 * 160 * (1 - fluid) * Math.pow(earth - 0.9, 2)),
+									capColor(220 - earth * 140 - fluid * (140 - earth * 76)));
+							theGrid[r][c].setColorID(mudColor);
+
+						} else {
+							theGrid[r][c].setColorID(new Color(capColor(160 * terrainMap[r][c] + 48),
+									capColor(128 * terrainMap[r][c] + 32),
+									capColor(64 * terrainMap[r][c] + 16)));
+						}
+					}
+
+				}
+
+				if (palette == 2) {
+					// Meat
 					if (terrainController.getFluidAt(c, r) > 0 && terrainMap[r][c] < terrainController.getSeaLevel()) {
 						theGrid[r][c].setColorID(new Color(capColor(255 * terrainController.getFluidEarthAt(c, r)),
 								capColor(5500 * terrainController.getFluidAt(c, r) + 200),
@@ -99,6 +109,30 @@ public class GridDemoPanel extends JPanel implements MouseListener, KeyListener
 						theGrid[r][c].setColorID(new Color(capColor(Math.sqrt(55225 * terrainMap[r][c])),
 								capColor(227 * Math.pow(terrainMap[r][c], 2) + 10),
 								capColor(180 * Math.pow(terrainMap[r][c], 2) + 20)));
+					}
+				}
+
+				if (palette == 3) {
+					// Sediment
+					theGrid[r][c].setColorID(new Color(capColor(terrainController.getFluidEarthAt(c, r) * 255000000), 0, 0));
+				}
+
+				if (palette == 4) {
+					// Terrain
+					theGrid[r][c].setColorID(new Color(0, capColor(terrainMap[r][c] * Math.pow(10,100)), 0));
+				}
+
+				if (palette == 5) {
+					// Water
+					theGrid[r][c].setColorID(new Color(0, 0, capColor(terrainController.getFluidAt(c, r) * Math.pow(10,100))));
+				}
+
+				if (palette == 6) {
+					// Coast
+					if (terrainMap[r][c] > terrainController.getSeaLevel()) {
+						theGrid[r][c].setColorID(new Color(0, capColor(terrainMap[r][c] * 128 + 128), 0));
+					} else {
+						theGrid[r][c].setColorID(new Color(0, 0, capColor(terrainMap[r][c] * 128 + 128)));
 					}
 				}
 
@@ -113,16 +147,7 @@ public class GridDemoPanel extends JPanel implements MouseListener, KeyListener
 	 */
 	public void userClickedCell(int row, int col)
 	{
-		
 		System.out.println("("+row+", "+col+")");
-		if (!theGrid[row][col].isLive())
-			return;
-		score += theGrid[row][col].getColorID();
-		myParent.updateScore(score);
-		
-		theGrid[row][col].cycleColorIDForward();
-		repaint();
-		
 	}
 	
 	
@@ -148,11 +173,16 @@ public class GridDemoPanel extends JPanel implements MouseListener, KeyListener
 		// TODO Auto-generated method stub
 		// mouse location is at e.getX() , e.getY().
 		// if you wish to convert to the rows and columns, you can integer-divide by the cell size.
-		int col = e.getX()/Cell.CELL_SIZE;
-		int row = e.getY()/Cell.CELL_SIZE;
-		userClickedCell(row,col);
-		
-		
+//		int col = e.getX()/Cell.CELL_SIZE;
+//		int row = e.getY()/Cell.CELL_SIZE;
+//		userClickedCell(row,col);
+		if (palette == 0) {
+			palette = 6;
+		}
+		else if (palette == 6) {
+			palette = 0;
+		}
+		repaint();
 	}
 
 	@Override

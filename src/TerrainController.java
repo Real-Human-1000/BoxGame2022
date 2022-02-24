@@ -86,10 +86,10 @@ public class TerrainController {
         }
 
         // Create some starting rivers
-        for (int r = 0; r < 3; r++) {
+        for (int r = 0; r < 0; r++) {
             // Set starting point of river channel and add water source
             double[] pos = {Math.random()*width, Math.random()*height/2};
-            ffield.addSource((int)pos[0], (int)pos[1], 0.1, 0.001, 2, 0); // Does positive == down? probably
+            ffield.addSource((int)pos[0], (int)pos[1], 0.1, 0.001, 1, 0); // Does positive == down? probably
 
             while (terrain[(int)pos[1]][(int)pos[0]] > 0.15) {
                 if (terrain[(int)pos[1]][(int)pos[0]] > 0.2)
@@ -113,16 +113,43 @@ public class TerrainController {
 
     public void update() {
         // Updates itself and the fluid field
+        double aveSpeed = 0;
+        double maxSpeed = 0;
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 // Change terrain heights
                 double speed = Math.sqrt(Math.pow(ffield.getVx(x, y), 2) + Math.pow(ffield.getVy(x, y), 2));
-                // Min speed is 0, max speed is realistically 5, so we'll map to that range
-                speed = Math.min(speed, 2);
+                // Min speed is 0, max speed is realistically 10, normal highest speed is 2
+
+                aveSpeed += speed;
+                if (speed > maxSpeed && speed < 1.0)
+                    maxSpeed = speed;
 
                 // Total amount of sediment to deposit
-                double deltaTerrain = Math.min(-1 * Math.pow(speed - 1, 3) / 500 * ffield.getDensity(x, y) * 5, ffield.getEarthDensity(x, y));
-                ffield.setEarthDensity(x, y, ffield.getEarthDensity(x, y) - deltaTerrain);
+                double deltaTerrain = 0;
+
+                if (speed >= 1) {
+                    // Consume
+                    // dT ~ s
+                    // dT ~ f
+                    // dT ~ 1 - e
+                    deltaTerrain = -1 * Math.min(speed * ffield.getDensity(x, y) * (1 - ffield.getEarthDensity(x, y)) / 100, terrain[y][x]);
+                }
+                if (speed < 1) {
+                    // Release
+                    // dT ~ 1 - s
+                    // dT ~ f
+                    // dT ~ e
+                    deltaTerrain = Math.min((1 - speed) * ffield.getDensity(x, y) * ffield.getEarthDensity(x, y) / 100, ffield.getEarthDensity(x, y));
+                }
+
+//                if (!(deltaTerrain != deltaTerrain))
+//                    System.out.println(deltaTerrain);
+
+                ffield.setEarthDensity(x, y, ffield.getEarthDensity(x, y) + deltaTerrain);
+
+//                if (x == 30 && y == 30)
+//                System.out.println(speed + " + " + ffield.getDensity(x, y) + " + " + ffield.getEarthDensity(x, y) + " --> " + deltaTerrain);
 
                 // Split up sediment among neighboring tiles
                 int numTiles = 5;
@@ -142,6 +169,7 @@ public class TerrainController {
                 ffield.setVy(x, y, ffield.getVy(x, y) - Math.min(terrain[y][x]*2,1) * ffield.getVy(x, y));
             }
         }
+        // System.out.println(aveSpeed/(width*height) + ", " + maxSpeed);
     }
 
     public void stepAndUpdate() {
