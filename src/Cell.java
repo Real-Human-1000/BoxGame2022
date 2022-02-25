@@ -115,7 +115,7 @@ public class Cell
 	}
 
 	public void setColorID(Color color) {
-		if(getGreatestColorDifference(color,this.color)>50){//getColorDifferenceSQ(color,this.color)>2500){
+		if(getGreatestColorDifference(color,this.color)>10){//getColorDifferenceSQ(color,this.color)>2500){
 			if (colorChanged == false) {
 				flipThread = new CellFlipManager(this, this.color);
 				colorChanged = true;

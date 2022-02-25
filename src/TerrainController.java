@@ -66,13 +66,17 @@ public class TerrainController {
         // Inspired by (but not taken from) http://www-cs-students.stanford.edu/~amitp/game-programming/polygon-map-generation/
         terrain = new double[height][width];
 
+        // Make a bunch of points that will define the terrain
         double[][] points = new double[100][3];
 
+        // Randomize said points
         for (int p = 0; p < points.length; p++) {
             double h = Math.random()*height;
             points[p] = new double[] {Math.random() * width, h, 1 - h/height + (Math.random() - 0.5)/4};
         }
 
+        // For each position in the terrain array,
+        // assign it a value based on the closest point (plus some random flair)
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 double distdist = width*width + height*height;
@@ -96,18 +100,19 @@ public class TerrainController {
             double[] pos = {Math.random()*width, Math.random()*height/2};
             ffield.addSource((int)pos[0], (int)pos[1], 0.1, 0.001, 1, 0); // Does positive == down? probably
 
-            while (terrain[(int)pos[1]][(int)pos[0]] > 0.15) {
-                if (terrain[(int)pos[1]][(int)pos[0]] > 0.2)
-                    terrain[(int)pos[1]][(int)pos[0]] = 0.2; // *= 0.75;
+            while (terrain[(int)pos[1]][(int)pos[0]] > seaLevel/2) {
+                if (terrain[(int)pos[1]][(int)pos[0]] > seaLevel*0.75)
+                    terrain[(int)pos[1]][(int)pos[0]] = seaLevel*0.75;
 
                 // Position of river mouth moves randomly, with a downward bias
                 // Vertical movement changes depending on terrain height
                 // We can assume that the terrain flattens out as it gets closer to sea near the bottom of the screen
+                // I mean we can't actually assume that, but it makes it look nicer
                 pos[1] += (Math.random() + 1) * 0.5 * terrain[(int)pos[1]][(int)pos[0]];
                 pos[0] += 1.1 * (Math.random() - 0.5);
                 // pos[1] += Math.random()/5 + 0.15;
 
-                // Make sure that the river doesn't go outside of the terrain array
+                // Make sure that the river doesn't go outside the terrain array
                 if (pos[0] < 0) { pos[0] = 0; }
                 if (pos[0] > width-1) { pos[0] = width-1; }
                 if (pos[1] < 0) { pos[1] = 0; }
@@ -118,17 +123,11 @@ public class TerrainController {
 
     public void update() {
         // Updates itself and the fluid field
-        double aveSpeed = 0;
-        double maxSpeed = 0;
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 // Change terrain heights
                 double speed = Math.sqrt(Math.pow(ffield.getVx(x, y), 2) + Math.pow(ffield.getVy(x, y), 2));
                 // Min speed is 0, max speed is realistically 10, normal highest speed is 2
-
-                aveSpeed += speed;
-                if (speed > maxSpeed && speed < 1.0)
-                    maxSpeed = speed;
 
                 // Total amount of sediment to deposit
                 double deltaTerrain = 0;
@@ -148,13 +147,7 @@ public class TerrainController {
                     deltaTerrain = Math.min((1 - speed) * ffield.getDensity(x, y) * ffield.getEarthDensity(x, y) / 100, ffield.getEarthDensity(x, y));
                 }
 
-//                if (!(deltaTerrain != deltaTerrain))
-//                    System.out.println(deltaTerrain);
-
                 ffield.setEarthDensity(x, y, ffield.getEarthDensity(x, y) + deltaTerrain);
-
-//                if (x == 30 && y == 30)
-//                System.out.println(speed + " + " + ffield.getDensity(x, y) + " + " + ffield.getEarthDensity(x, y) + " --> " + deltaTerrain);
 
                 // Split up sediment among neighboring tiles
                 int numTiles = 5;
@@ -168,14 +161,12 @@ public class TerrainController {
 //                if (y < height-1) { terrain[y+1][x] += deltaTerrain/numTiles; }
                 terrain[y][x]=ffield.getEarthDensity(x,y);
 
-
                 // Change wall status
 //                ffield.setWall(x, y, terrain[y][x] > this.seaLevel);
 //                ffield.setVx(x, y, ffield.getVx(x, y) - Math.min(terrain[y][x]*2,1) * ffield.getVx(x, y));
 //                ffield.setVy(x, y, ffield.getVy(x, y) - Math.min(terrain[y][x]*2,1) * ffield.getVy(x, y));
             }
         }
-        // System.out.println(aveSpeed/(width*height) + ", " + maxSpeed);
     }
 
     public void stepAndUpdate() {
@@ -210,7 +201,30 @@ public class TerrainController {
     }
 
     public double getSeaLevel() {
+        // Get sea level
         return this.seaLevel;
+    }
+
+    public double[] getSlope(int x, int y) {
+        // Estimate the slope at a tile
+        double[] slope = new double[2];
+        if (x == 0) {
+            slope[0] = terrain[y][x+1] - terrain[y][x];
+        } else if (x == width-1) {
+            slope[0] = terrain[y][x] - terrain[y][x-1];
+        } else {
+            slope[0] = (terrain[y][x+1] - terrain[y][x-1]) / 2;
+        }
+
+        if (y == 0) {
+            slope[1] = terrain[y+1][x] - terrain[y][x];
+        } else if (y == height-1) {
+            slope[1] = terrain[y][x] - terrain[y-1][x];
+        } else {
+            slope[1] = (terrain[y+1][x] - terrain[y-1][x]) / 2;
+        }
+
+        return slope;
     }
 
     public void printArray(double[][] arr) {
