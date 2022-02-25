@@ -28,9 +28,6 @@ public class GridDemoPanel extends JPanel implements MouseListener, KeyListener
 	{
 		super();
 		resetCells();
-//		theGrid[2][2].setMarker("A");
-//		theGrid[2][2].setDisplayMarker(true);
-//		theGrid[3][3].setIsLive(false);
 		setBackground(Color.BLACK);
 		addMouseListener(this);
 		//parent.addKeyListener(this); // activate this if you wish to listen to the keyboard. 
@@ -59,13 +56,14 @@ public class GridDemoPanel extends JPanel implements MouseListener, KeyListener
 	public void paintComponent(Graphics g)
 	{
 		super.paintComponent(g);
-		//g.clearRect(0,0,getWidth(),getHeight());
+
+		// Loop through every cell and set its color
 		for (int r =0; r<NUM_ROWS; r++)
 			for (int c=0; c<NUM_COLS; c++) {
 				theGrid[r][c].setMyGC(getGraphicsConfiguration());
 
 				if (palette == 0) {
-					// Direct
+					// Direct - directly maps sediment to red, terrain to green, and water to blue
 					theGrid[r][c].setColorID(new Color (
 							capColor(terrainController.getFluidEarthAt(c, r) * 255),
 							capColor(terrainMap[r][c] * 255),
@@ -74,13 +72,11 @@ public class GridDemoPanel extends JPanel implements MouseListener, KeyListener
 				}
 
 				if (palette == 1) {
-					// Mud
+					// Mud - the color palette I (H) designed to show nice water and mud colors
 					if (terrainMap[r][c] >= terrainController.getSeaLevel()) {
 						theGrid[r][c].setColorID(new Color(64, capColor(255 * terrainMap[r][c]), 64));
 
 					} else {
-						// theGrid[r][c].setColorID(new Color(0,50,Math.min((int)(terrainController.getFluidAt(c,r)*25500), 255)));
-
 						if (terrainController.getFluidAt(c, r) > 0) {
 							double earth = terrainController.getFluidEarthAt(c, r);
 							double fluid = terrainController.getFluidAt(c, r);
@@ -113,22 +109,22 @@ public class GridDemoPanel extends JPanel implements MouseListener, KeyListener
 				}
 
 				if (palette == 3) {
-					// Sediment
+					// Binary Sediment - red if there's suspended sediment (aka fluid earth), black if not
 					theGrid[r][c].setColorID(new Color(capColor(terrainController.getFluidEarthAt(c, r) * Math.pow(10,100)), 0, 0));
 				}
 
 				if (palette == 4) {
-					// Terrain
+					// Binary Terrain - green if there's terrain, black if not
 					theGrid[r][c].setColorID(new Color(0, capColor(terrainMap[r][c] * Math.pow(10,100)), 0));
 				}
 
 				if (palette == 5) {
-					// Water
+					// Binary Water - blue if there's water, black if not
 					theGrid[r][c].setColorID(new Color(0, 0, capColor(terrainController.getFluidAt(c, r) * Math.pow(10,100))));
 				}
 
 				if (palette == 6) {
-					// Coast
+					// Coast - shows whether a tile is above sea level (green) or below (blue)
 					if (terrainMap[r][c] > terrainController.getSeaLevel()) {
 						theGrid[r][c].setColorID(new Color(0, capColor(terrainMap[r][c] * 128 + 128), 0));
 					} else {
@@ -137,14 +133,14 @@ public class GridDemoPanel extends JPanel implements MouseListener, KeyListener
 				}
 
 				if (palette == 7) {
-					// Slope
+					// Slope - shows estimated slope of tiles, either X and Y or magnitude
 					double[] slope = terrainController.getSlope(c, r);
 					// System.out.println(slope[0] + " " + slope[1]);
 					theGrid[r][c].setColorID(new Color(capColor(slope[0]*128 + 128), capColor(slope[1]*128 + 128), 128));
 					//theGrid[r][c].setColorID(new Color(capColor(Math.sqrt(slope[0]*slope[0] + slope[1]*slope[1]) * 1024), 64, 64));
 				}
 
-				theGrid[r][c].drawSelf(g, deltaTime, true);
+				theGrid[r][c].drawSelf(g, deltaTime, true); // remember to change this back to performanceMode
 			}
 	}
 	
