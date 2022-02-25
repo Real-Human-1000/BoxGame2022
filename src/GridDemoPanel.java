@@ -19,10 +19,10 @@ public class GridDemoPanel extends JPanel implements MouseListener, KeyListener
 	public int score;
 	public double deltaTime = 0;
 	public boolean performanceMode;
-	private int palette = 1;
-	// 0 = direct, 1 = mud, 2 = meat,
-	// 3 = sediment, 4 = terrain, 5 = water
-	// 6 = coast
+	private int palette = 0;
+	// 0 = direct, 1 = classic, 2 = meat,
+	// 3 = binary sediment, 4 = binary terrain, 5 = binary water
+	// 6 = coast, 7 = slope
 	
 	public GridDemoPanel(GridDemoFrame parent)
 	{
@@ -114,7 +114,7 @@ public class GridDemoPanel extends JPanel implements MouseListener, KeyListener
 
 				if (palette == 3) {
 					// Sediment
-					theGrid[r][c].setColorID(new Color(capColor(terrainController.getFluidEarthAt(c, r) * 255000000), 0, 0));
+					theGrid[r][c].setColorID(new Color(capColor(terrainController.getFluidEarthAt(c, r) * Math.pow(10,100)), 0, 0));
 				}
 
 				if (palette == 4) {
@@ -136,7 +136,15 @@ public class GridDemoPanel extends JPanel implements MouseListener, KeyListener
 					}
 				}
 
-				theGrid[r][c].drawSelf(g, deltaTime, performanceMode);
+				if (palette == 7) {
+					// Slope
+					double[] slope = terrainController.getSlope(c, r);
+					// System.out.println(slope[0] + " " + slope[1]);
+					theGrid[r][c].setColorID(new Color(capColor(slope[0]*128 + 128), capColor(slope[1]*128 + 128), 128));
+					//theGrid[r][c].setColorID(new Color(capColor(Math.sqrt(slope[0]*slope[0] + slope[1]*slope[1]) * 255), 64, 64));
+				}
+
+				theGrid[r][c].drawSelf(g, deltaTime, true);
 			}
 	}
 	
@@ -177,9 +185,9 @@ public class GridDemoPanel extends JPanel implements MouseListener, KeyListener
 //		int row = e.getY()/Cell.CELL_SIZE;
 //		userClickedCell(row,col);
 		if (palette == 0) {
-			palette = 6;
+			palette = 7;
 		}
-		else if (palette == 6) {
+		else if (palette == 7) {
 			palette = 0;
 		}
 		repaint();

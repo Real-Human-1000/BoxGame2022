@@ -19,7 +19,7 @@ public class FluidField {
     private int h;
     private int w;
 
-    private double dt=0.001;
+    private double dt=0.1;
     private double visc = 0.0001; // 0.0001
     private double diff = 0.0001;
     private int N;

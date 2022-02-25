@@ -86,14 +86,14 @@ public class TerrainController {
         }
 
         // Create some starting rivers
-        for (int r = 0; r < 0; r++) {
+        for (int r = 0; r < 1; r++) {
             // Set starting point of river channel and add water source
             double[] pos = {Math.random()*width, Math.random()*height/2};
             ffield.addSource((int)pos[0], (int)pos[1], 0.1, 0.001, 1, 0); // Does positive == down? probably
 
-            while (terrain[(int)pos[1]][(int)pos[0]] > 0.15) {
-                if (terrain[(int)pos[1]][(int)pos[0]] > 0.2)
-                    terrain[(int)pos[1]][(int)pos[0]] = 0.2; // *= 0.75;
+            while (terrain[(int)pos[1]][(int)pos[0]] > seaLevel/2) {
+                if (terrain[(int)pos[1]][(int)pos[0]] > seaLevel*0.75)
+                    terrain[(int)pos[1]][(int)pos[0]] = seaLevel*0.75;
 
                 // Position of river mouth moves randomly, with a downward bias
                 // Vertical movement changes depending on terrain height
@@ -205,6 +205,27 @@ public class TerrainController {
 
     public double getSeaLevel() {
         return this.seaLevel;
+    }
+
+    public double[] getSlope(int x, int y) {
+        double[] slope = new double[2];
+        if (x == 0) {
+            slope[0] = terrain[y][x+1] - terrain[y][x];
+        } else if (x == width-1) {
+            slope[0] = terrain[y][x] - terrain[y][x-1];
+        } else {
+            slope[0] = (terrain[y][x+1] - terrain[y][x-1]) / 2;
+        }
+
+        if (y == 0) {
+            slope[1] = terrain[y+1][x] - terrain[y][x];
+        } else if (y == height-1) {
+            slope[1] = terrain[y][x] - terrain[y-1][x];
+        } else {
+            slope[1] = (terrain[y+1][x] - terrain[y-1][x]) / 2;
+        }
+
+        return slope;
     }
 
     public void printArray(double[][] arr) {
