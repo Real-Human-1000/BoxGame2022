@@ -141,7 +141,7 @@ public class GridDemoPanel extends JPanel implements MouseListener, KeyListener
 					double[] slope = terrainController.getSlope(c, r);
 					// System.out.println(slope[0] + " " + slope[1]);
 					theGrid[r][c].setColorID(new Color(capColor(slope[0]*128 + 128), capColor(slope[1]*128 + 128), 128));
-					//theGrid[r][c].setColorID(new Color(capColor(Math.sqrt(slope[0]*slope[0] + slope[1]*slope[1]) * 255), 64, 64));
+					//theGrid[r][c].setColorID(new Color(capColor(Math.sqrt(slope[0]*slope[0] + slope[1]*slope[1]) * 1024), 64, 64));
 				}
 
 				theGrid[r][c].drawSelf(g, deltaTime, true);
