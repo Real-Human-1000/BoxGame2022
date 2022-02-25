@@ -9,10 +9,15 @@ public class TerrainController {
         this.width = w;
         this.height = h;
         this.seaLevel = 0.3;
-        this.ffield = new FluidField(h, w);  // Jack tells me to keep this a square
+        this.ffield = new FluidField(h*2, w*2);  // Jack tells me to keep this a square
 
         //worleyTerrain();  // For islands. Not great, but it's what we got
         polyTerrain();  // Good for rivers
+        for(int x=0; x<w; x++){
+            for(int y=0; y<h; y++){
+                ffield.setEarthDensity(x,y,terrain[y][x]);
+            }
+        }
         //snazzyDisplay();
     }
 
@@ -86,7 +91,7 @@ public class TerrainController {
         }
 
         // Create some starting rivers
-        for (int r = 0; r < 0; r++) {
+        for (int r = 0; r < 1; r++) {
             // Set starting point of river channel and add water source
             double[] pos = {Math.random()*width, Math.random()*height/2};
             ffield.addSource((int)pos[0], (int)pos[1], 0.1, 0.001, 1, 0); // Does positive == down? probably
@@ -156,17 +161,18 @@ public class TerrainController {
                 if (x == 0 || x == width - 1) { numTiles -= 1; } // Left or right side
                 if (y == 0 || y == height - 1) { numTiles -= 1; } // Top or bottom
 
-                terrain[y][x] += deltaTerrain/numTiles;
-                if (x > 0) { terrain[y][x-1] += deltaTerrain/numTiles; }
-                if (x < width-1) { terrain[y][x+1] += deltaTerrain/numTiles; }
-                if (y > 0) { terrain[y-1][x] += deltaTerrain/numTiles; }
-                if (y < height-1) { terrain[y+1][x] += deltaTerrain/numTiles; }
+//                terrain[y][x] += deltaTerrain/numTiles;
+//                if (x > 0) { terrain[y][x-1] += deltaTerrain/numTiles; }
+//                if (x < width-1) { terrain[y][x+1] += deltaTerrain/numTiles; }
+//                if (y > 0) { terrain[y-1][x] += deltaTerrain/numTiles; }
+//                if (y < height-1) { terrain[y+1][x] += deltaTerrain/numTiles; }
+                terrain[y][x]=ffield.getEarthDensity(x,y);
 
 
                 // Change wall status
-                ffield.setWall(x, y, terrain[y][x] > this.seaLevel);
-                ffield.setVx(x, y, ffield.getVx(x, y) - Math.min(terrain[y][x]*2,1) * ffield.getVx(x, y));
-                ffield.setVy(x, y, ffield.getVy(x, y) - Math.min(terrain[y][x]*2,1) * ffield.getVy(x, y));
+//                ffield.setWall(x, y, terrain[y][x] > this.seaLevel);
+//                ffield.setVx(x, y, ffield.getVx(x, y) - Math.min(terrain[y][x]*2,1) * ffield.getVx(x, y));
+//                ffield.setVy(x, y, ffield.getVy(x, y) - Math.min(terrain[y][x]*2,1) * ffield.getVy(x, y));
             }
         }
         // System.out.println(aveSpeed/(width*height) + ", " + maxSpeed);

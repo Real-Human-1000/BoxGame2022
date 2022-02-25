@@ -18,10 +18,12 @@ public class FluidField {
 
     private int h;
     private int w;
+    private int size=2;
 
-    private double dt=0.001;
-    private double visc = 0.0001; // 0.0001
-    private double diff = 0.0001;
+    private double dt=0.0001;
+    private double visc = 0.1;
+    private double viscE = 0.99;
+    private double diff = 0.0000001;
     private int N;
 
     private double t;
@@ -75,23 +77,25 @@ public class FluidField {
     }
 
     public void step(){
-        for(int i=0; i<walls.length; i++){
-            if(walls[i]){
-                density[i]=0;
-                vx[0]=0;
-                vy[0]=0;
-            }
-        }
+
         vel_step ( N, vy, vx, vy0, vx0, visc, dt );
         dens_step ( N, density, density0, vy, vx, diff, dt );
-        dens_step ( N, earthDensity, earthDensity0, vy, vx, diff, dt );
+        dens_step ( N, earthDensity, earthDensity0, vy, vx, viscE, dt );
         for (int i=0; i<sources.size(); i++){
             int x = sources.get(i).getX();
             int y = sources.get(i).getY();
-            density[IX(x,y)]=sources.get(i).getDensity();
-            earthDensity[IX(x,y)]=sources.get(i).getEarthDensity();
-            vx[IX(x,y)]=sources.get(i).getVx();
-            vy[IX(x,y)]=sources.get(i).getVy();
+            setAVG(density, sources.get(i).getDensity(),x,y);
+            setAVG(earthDensity, sources.get(i).getEarthDensity(),x,y);
+            setAVG(vx, sources.get(i).getVx(),x,y);
+            setAVG(vy, sources.get(i).getVy(),x,y);
+        }
+        for(int i=0; i<walls.length; i++){
+            if(walls[i]){
+                density[i]=0;
+                //earthDensity[i]=0;
+                vx[0]=0;
+                vy[0]=0;
+            }
         }
     }
 
@@ -131,7 +135,7 @@ public class FluidField {
     public void dens_step ( int N, double[] x, double[] x0, double[] u, double[] v, double diff, double dt )
     {
         swap( x0, x ); diffuse( N, 0, x, x0, diff, dt );
-        swap( x0, x ); advect( N, 0, x, x0, u, v, dt );
+        swap( x0, x ); //advect( N, 0, x, x0, u, v, dt );
     }
 
     public void vel_step ( int N, double[] u, double[] v, double[] u0, double[] v0,
@@ -188,9 +192,9 @@ public class FluidField {
                 x[IX(0, i)] = x[IX(1, i)];
             }
             if ((b == 1)) {
-                //x[IX(N+1,i)] = -x[IX(N,i)];
+                x[IX(N+1,i)] = -x[IX(N,i)];
             } else {
-                //x[IX(N+1,i)] = x[IX(N,i)];
+                x[IX(N+1,i)] = x[IX(N,i)];
             }
             if ((b == 2)) {
                 x[IX(i,0 )] = -x[IX(i,1)];
@@ -253,6 +257,34 @@ public class FluidField {
         if(j*h+i<w*h) return j*h+i; else return 0 ;
     }
 
+    public int IXW(int i, int j){
+        return IX(i*size,j*size);
+    }
+    public double IXAVG(double[] d, int x, int y){
+        int numTiles = 4;
+        if (x*size == w - 1) { numTiles -= 1; } // Left or right side
+        if (y*size == h - 1) { numTiles -= 1; } // Top or bottom
+
+        double v = 0;
+        v +=d[IXW(x,y)];
+        if (x*size < w-2) { v+=d[IXW(x,y)+1]; }
+        if (x*size < w-2 && y*size < h-2 ){ v+=d[IXW(x,y)+h+1]; }
+        if (y*size < h-2) { v+=d[IXW(x,y)+h]; }
+        return v/numTiles;
+    }
+    public void setAVG(double[] d, double set, int x, int y){
+        d[IXW(x,y)]=set;
+        if (x*size < w-2) { d[IXW(x,y)+1]=set; }
+        if (x*size < w-2 && y*size < h-2) { d[IXW(x,y)+h+1]=set; }
+        if (y*size < h-2) { d[IXW(x,y)+h]=set; }
+    }
+    public void setAVGB(Boolean[] d, boolean set, int x, int y){
+        d[IXW(x,y)]=set;
+        if (x*size < w-2) { d[IXW(x,y)+1]=set; }
+        if (x*size < w-2 && y*size < h-2) { d[IXW(x,y)+h+1]=set; }
+        if (y*size < h-2) { d[IXW(x,y)+h]=set; }
+    }
+
     public int getH() {
         return h;
     }
@@ -266,16 +298,16 @@ public class FluidField {
     public Boolean[] getWalls(){ return walls; }
 
     public Boolean getWall(int i, int j){ return walls[IX(i,j)]; }
-    public double getDensity(int i, int j){ return density[IX(i,j)]; }
-    public double getVx(int i, int j){ return vx[IX(i,j)]; }
-    public double getVy(int i, int j){ return vy[IX(i,j)]; }
+    public double getDensity(int i, int j){ return IXAVG(density,i,j); }
+    public double getVx(int i, int j){ return IXAVG(vx,i,j); }
+    public double getVy(int i, int j){ return IXAVG(vy,i,j); }
 
-    public void setWall(int i, int j, boolean b){ walls[IX(i,j)]=b; }
-    public void setDensity(int i, int j, double d){ density[IX(i,j)]=d; }
-    public void setVx(int i, int j, double v){ vx[IX(i,j)]=v; }
-    public void setVy(int i, int j, double v){ vy[IX(i,j)]=v; }
-    public void setEarthDensity(int i, int j, double d){ earthDensity[IX(i,j)]=d; }
-    public double getEarthDensity(int i, int j){ return earthDensity[IX(i,j)]; }
+    public void setWall(int i, int j, boolean b){ setAVGB(walls,b,i,j); }
+    public void setDensity(int i, int j, double d){ setAVG(density,d,i,j); }
+    public void setVx(int i, int j, double v){ setAVG(vx,v,i,j); }
+    public void setVy(int i, int j, double v){ setAVG(vy,v,i,j); }
+    public void setEarthDensity(int i, int j, double d){ setAVG(earthDensity,d,i,j); }
+    public double getEarthDensity(int i, int j){ return IXAVG(earthDensity,i,j); }
 
     public void addSource(int x, int y, double density, double earthDensity, double vx, double vy){
         boolean found = false;

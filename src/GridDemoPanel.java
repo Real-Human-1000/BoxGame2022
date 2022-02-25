@@ -136,7 +136,7 @@ public class GridDemoPanel extends JPanel implements MouseListener, KeyListener
 					}
 				}
 
-				theGrid[r][c].drawSelf(g, deltaTime, performanceMode);
+				theGrid[r][c].drawSelf(g, deltaTime, true);
 			}
 	}
 	
