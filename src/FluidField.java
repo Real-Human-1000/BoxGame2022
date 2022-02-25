@@ -59,7 +59,7 @@ public class FluidField {
 //                    vy[j][i] = Math.random() - 0.5;
 //                    walls[j][i] = false;
 //                } else {
-                density[j][i] = 0.1;
+                density[j][i] = 0.0;
                 vx[j][i] = 0;
                 vy[j][i] = 0;
                 walls[j][i] = false;
@@ -112,11 +112,35 @@ public class FluidField {
         }
     }
 
+    public void advect(int N, int b, double[][] d, double[][] d0, double[][] vx, double[][] vy, double dt){
+        int i, j, i0, j0, i1, j1;
+        double x, y, s0, t0, s1, t1, dt0;
+        dt0 = dt*N;
+        for ( i=1 ; i<N ; i++ ) {
+            for ( j=1 ; j<N ; j++ ) {
+                x = i-dt0*vx[j][i]; y = j-dt0*vy[j][i];
+                i0=(int)x; i1=i0+1;
+                j0=(int)y; j1=j0+1;
+                s1 = x-i0; s0 = 1-s1; t1 = y-j0; t0 = 1-t1;
+                double add1 = 0;
+                if(israel(i0,j0)) add1+=t0*d0[j0][i0];
+                if(israel(i0,j1)) add1+=t1*d0[j1][i0];
+                add1*=s0;
+                double add2 = 0;
+                if(israel(i1,j0)) add2+=t0*d0[j0][i1];
+                if(israel(i1,j1)) add2+=t1*d0[j1][i1];
+                add2*=s1;
+                d[j][i] = add1 + add2;
+            }
+        }
+        set_bnd ( N, b, d );
+    }
+
 
     public void dens_step ( int N, double[][] x, double[][] x0, double[][] u, double[][] v, double diff, double dt )
     {
         swap( x0, x ); diffuse( N, 0, x, x0, diff, dt );
-        swap( x0, x ); //advect( N, 0, x, x0, u, v, dt );
+        swap( x0, x ); advect( N, 0, x, x0, u, v, dt );
     }
 
     public void set_bnd ( int N, int b, double[][] x )
@@ -125,8 +149,10 @@ public class FluidField {
         //N=N-2;
         for ( i=1 ; i<=N ; i++ ) {
             if ((b == 1)) {
+                if(israel(0,i)&&israel(1,i))
                 x[i][0] = -x[i][1];
             } else {
+                if(israel(0,i)&&israel(1,i))
                 x[i][0] = x[i][1];
             }
             if ((b == 1)) {
@@ -152,9 +178,13 @@ public class FluidField {
             }
 
         }
+        if(israel(0,0)&&israel(1,0)&&israel(0,1))
         x[0][0] = 0.5*(x[0][1]+x[1][0]);
+        if(israel(0,N+1)&&israel(1,N+1)&&israel(0,N))
         x[N+1][0] = 0.5*(x[N+1][1]+x[N][0]);
+        if(israel(N+1,0)&&israel(N,0)&&israel(N+1,1))
         x[0][N+1] = 0.5*(x[0][N]+x[1][N+1]);
+        if(israel(N+1,N+1)&&israel(N,N+1)&&israel(N+1,N))
         x[N+1][N+1] = 0.5*(x[N+1][N]+x[N][N+1]);
     }
 
