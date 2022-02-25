@@ -19,7 +19,11 @@ public class GridDemoPanel extends JPanel implements MouseListener, KeyListener
 	public int score;
 	public double deltaTime = 0;
 	public boolean performanceMode;
-	private int palette = 0;
+	public static int[] flipThresholds = new int[]{50,10,10,1,1,10,10};
+	public static boolean forcePerformanceMode = false;
+	public static boolean doFlipAnims = true;
+	public static boolean addMode = true; //True for add water, false for sediment;
+	public static int palette = 0;
 	// 0 = direct, 1 = classic, 2 = meat,
 	// 3 = binary sediment, 4 = binary terrain, 5 = binary water
 	// 6 = coast, 7 = slope
@@ -38,7 +42,15 @@ public class GridDemoPanel extends JPanel implements MouseListener, KeyListener
 		terrainController = new TerrainController(NUM_ROWS,NUM_COLS);
 		terrainMap = terrainController.getTerrain();
 	}
-	
+
+	public void regenerateTerrain(){
+		resetCells();
+		setBackground(Color.BLACK);
+		terrainController = new TerrainController(NUM_ROWS,NUM_COLS);
+		terrainMap = terrainController.getTerrain();
+	}
+
+
 	/**
 	 * makes a new board with random colors, completely filled in, and resets the score to zero.
 	 */
@@ -144,7 +156,7 @@ public class GridDemoPanel extends JPanel implements MouseListener, KeyListener
 					//theGrid[r][c].setColorID(new Color(capColor(Math.sqrt(slope[0]*slope[0] + slope[1]*slope[1]) * 1024), 64, 64));
 				}
 
-				theGrid[r][c].drawSelf(g, deltaTime, true);
+				theGrid[r][c].drawSelf(g, deltaTime, performanceMode);
 			}
 	}
 	
@@ -169,7 +181,29 @@ public class GridDemoPanel extends JPanel implements MouseListener, KeyListener
 		JOptionPane.showMessageDialog(this, "Game Over.");
 		
 	}
-	
+
+	//============================ Button and UI Stuff ===============================
+
+	public static void setPalette(int palette) {
+		GridDemoPanel.palette = palette;
+	}
+
+	public static void setForcePerformanceMode(boolean forcePerformanceMode) {
+		GridDemoPanel.forcePerformanceMode = forcePerformanceMode;
+	}
+
+	public static void setDoFlipAnims(boolean doFlipAnims) {
+		GridDemoPanel.doFlipAnims = doFlipAnims;
+	}
+
+	public static void setAddMode(boolean addMode) {
+		GridDemoPanel.addMode = addMode;
+	}
+
+	public static int getFlipThreshold(){
+		return GridDemoPanel.flipThresholds[GridDemoPanel.palette];
+	}
+
 	//============================ Mouse Listener Overrides ==========================
 
 	@Override
@@ -277,7 +311,7 @@ public class GridDemoPanel extends JPanel implements MouseListener, KeyListener
 		deltaTime = millisecondsSinceLastStep;
 
 		terrainController.stepAndUpdate();
-		performanceMode = false;
+		performanceMode = forcePerformanceMode;
 		if (deltaTime>=12){
 			performanceMode = true;
 		}

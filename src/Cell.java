@@ -2,8 +2,6 @@ import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.VolatileImage;
 
-import javax.swing.ImageIcon;
-
 public class Cell
 {
 	// ----- static variables.... These belong to the class as a whole; all Cells have access to these individual variables.
@@ -21,12 +19,15 @@ public class Cell
 	private boolean displayMarker; // whether to show the cell label or not.
 	private boolean isLive; // whether the cell should appear at all.
 
-	private CellFlipManager flipThread;
+	private CellFlipManager flipManager;
 	private boolean colorChanged = false;
 	GraphicsConfiguration myGC = null;
 
 	private VolatileImage myDrip; //the cell's current appearance, buffered for performance
 	private double millisSinceLastFlip = 0;//keeps cells from flipping too often.
+	private boolean inPerformanceMode = false;
+
+
 
 	int lastTileStatus = 0;
 
@@ -43,47 +44,7 @@ public class Cell
 		// have to load the images.
 		marker = "";
 		displayMarker = false;
-		if (colorImages == null)
-		{
-			colorImages = new Image[filenames.length];
-			for (int i =0; i<filenames.length; i++) {
-				colorImages[i] = (new ImageIcon(filenames[i])).getImage();
 
-
-				/*
-				BufferedImage bimage = new BufferedImage(CELL_SIZE,
-						CELL_SIZE, BufferedImage.TYPE_INT_RGB);
-
-				// Copy non-RGB image to the RGB buffered image
-				Graphics2D g = bimage.createGraphics();
-				g.drawImage(colorImages[i], 0, 0,CELL_SIZE,CELL_SIZE,null);
-				g.dispose();
-
-				RescaleOp op = new RescaleOp(0.3f, 0, null);
-				bimage = op.filter(bimage,null);
-
-				colorImages[i] = bimage;*/
-
-			}
-
-			scaledColorImages = new Image[10][filenames.length];
-			for (int i = 0; i < filenames.length; i++) {
-				for (int j = 0; j < 10; j++) {
-					try {
-						scaledColorImages[(j)][i] = colorImages[i].getScaledInstance(
-								CELL_SIZE,
-								(int) (CELL_SIZE * Math.sin(j * Math.PI / 18)), Image.SCALE_DEFAULT);
-
-
-//						scaledColorImages[(j)][i] = colorImages[i].getScaledInstance(
-//								colorImages[i].getWidth(null),
-//								(int) (colorImages[i].getHeight(null) * Math.sin(j * Math.PI / 18)), Image.SCALE_DEFAULT);
-					}catch (IllegalArgumentException e){
-						scaledColorImages[j][i] = colorImages[i];
-					}
-				}
-			}
-		}
 	}
 	
 	public Cell(int cid)
@@ -115,16 +76,19 @@ public class Cell
 	}
 
 	public void setColorID(Color color) {
-		if(getGreatestColorDifference(color,this.color)>10){//getColorDifferenceSQ(color,this.color)>2500){
-			if (colorChanged == false) {
-				flipThread = new CellFlipManager(this, this.color);
-				colorChanged = true;
+		if(getGreatestColorDifference(color,this.color)>GridDemoPanel.getFlipThreshold()){//getColorDifferenceSQ(color,this.color)>2500){
+			if(GridDemoPanel.doFlipAnims) {
+				if (colorChanged == false) {
+					flipManager = new CellFlipManager(this, this.color);
+					colorChanged = true;
 
+				}
+				//millisSinceLastFlip = 0;
+				this.color = color;
+			}else{
+				this.color = color;
+				createDrip();
 			}
-			millisSinceLastFlip = 0;
-			this.color = color;
-			//if(!performanceMode)
-			//createDrip();
 		}
 		//this.colorID = colorID;
 	}
@@ -181,13 +145,6 @@ public class Cell
 		this.displayMarker = displayMarker;
 	}
 
-	public Image getMyImage(){return colorImages[colorID];}
-
-	public Image getMyScaledImage(int index){return scaledColorImages[index][colorID];}
-
-	public Image getImageAtIndex(int i){return colorImages[i];}
-
-	public Image getScaledImageAtIndex(int i, int scaleIndex){return scaledColorImages[scaleIndex][i];}
 
 	public void setColorChanged(boolean colorChanged) {
 		this.colorChanged = colorChanged;
@@ -270,12 +227,13 @@ public class Cell
 			return;
 		Graphics2D g2 = (Graphics2D)g.create();
 		millisSinceLastFlip+= deltaTime;
+		inPerformanceMode = performanceMode;
 		if(colorChanged){
-			flipThread.setG(g);
-			flipThread.updateAnim(deltaTime,performanceMode);
+			flipManager.setG(g);
+			flipManager.updateAnim(deltaTime,performanceMode);
 			//colorChanged = false;
 		}else{
-				flipThread = null;
+				flipManager = null;
 				//g2.drawImage(colorImages[colorID], x, y, CELL_SIZE, CELL_SIZE, null);
 				//g2.drawImage(colorImages[colorID].getScaledInstance(12,12,2), x, y, CELL_SIZE - 2, CELL_SIZE - 2, null);
 
@@ -287,44 +245,10 @@ public class Cell
 				if (performanceMode == false) {
 					//g2.drawImage(myDrip,x,y,CELL_SIZE,CELL_SIZE,null);
 					drawMyDrip(g2);
-//					AffineTransform graphicsTransform = g2.getTransform();
-//					g2.fillRoundRect(x, y, CELL_SIZE - 1, CELL_SIZE - 1, 1, 1);
-//					g2.translate(x, y);
-//					Shape scg = new ShadedCellGraphics(CELL_SIZE, CELL_SIZE);
-//					g2.setStroke(new BasicStroke(1, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-//					g2.setColor(color.brighter());
-//					g2.draw(scg);
-//					g2.setColor(color.brighter().darker());
-//					g2.transform(AffineTransform.getRotateInstance(Math.toRadians(180),
-//							((double) CELL_SIZE - 1) / 2.0, ((double) CELL_SIZE - 1) / 2.0));
-//					//scg = new ShadedCellGraphics(CELL_SIZE,CELL_SIZE,true);
-//					g2.draw(scg);
-//					//g2.setTransform(graphicsTransform);
 				} else {
 					g2.fillRect(x, y, CELL_SIZE, CELL_SIZE);
 					// System.out.println(deltaTime);
 				}
-
-//			g2.setColor(new Color(52,180,235));
-//			g2.setStroke(new BasicStroke(2,BasicStroke.CAP_ROUND,BasicStroke.JOIN_BEVEL));
-//			g2.fillRoundRect(x+1, y+1, CELL_SIZE-1, CELL_SIZE-1, 1, 1);
-//
-//			g2.setColor(new Color(52,180,235));
-//			g2.setStroke(new BasicStroke(2,BasicStroke.CAP_ROUND,BasicStroke.JOIN_BEVEL));
-//			g2.drawRoundRect(x+1, y+1, CELL_SIZE-2, CELL_SIZE-2, 1, 1);
-
-//			g2.setColor(mixColor(new Color(52,180,235),Color.BLACK,0.5));
-//			g2.setStroke(new BasicStroke(2,BasicStroke.CAP_ROUND,BasicStroke.JOIN_BEVEL));
-//			g2.drawRoundRect(x , y, CELL_SIZE - 0, CELL_SIZE - 0, 3, 3);
-
-
-			//g2.setColor(new Color(192, 192, 192));
-			//g2.setStroke(new BasicStroke(3));
-			//g2.drawRoundRect(x + 1, y + 1, CELL_SIZE - 4, CELL_SIZE - 4, 8, 8);
-
-			//g2.setColor(new Color(64, 64, 64));
-			//g2.setStroke(new BasicStroke(2));
-			//g2.drawRoundRect(x + 1, y + 1, CELL_SIZE - 4, CELL_SIZE - 4, 8, 8);
 		}
 
 
@@ -367,15 +291,6 @@ public class Cell
 			   (((Cell) other).marker   == this.marker))
 			return true;
 		return false;
-	}
-
-	public Color mixColor(Color startColor, Color modifier, double percent){
-		int r = (int)(startColor.getRed()*(1.0-percent) + modifier.getRed()*(percent));
-		int g = (int)(startColor.getGreen()*(1.0-percent) + modifier.getGreen()*(percent));
-		int b = (int)(startColor.getBlue()*(1.0-percent) + modifier.getBlue()*(percent));
-
-		Color output = new Color(r,g,b);
-		return output;
 	}
 
 	public String toString()

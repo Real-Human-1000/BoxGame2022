@@ -190,7 +190,7 @@ public class TerrainController {
         return ffield.getDensity(x, y);
     }
 
-    public double[] getFluid() {
+    public double[][] getFluid() {
         // Get the entire density 1D array
         return ffield.getDensityArr();
     }
