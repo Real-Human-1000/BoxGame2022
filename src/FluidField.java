@@ -20,19 +20,21 @@ public class FluidField {
     private int w;
     private int size=2;
 
-    private double dt=0.0001;
+    private double dt=0.5;
     private double visc = 0.1;
     private double viscE = 0.99;
-    private double diff = 0.0000001;
+    private double diff = 0.99;
     private int N;
 
     private double t;
+
+    private TerrainController terrainController;
 
     private ArrayList<WaterSource> sources;
 
 //    private boolean mdown = false;
 //    private boolean state0 = false;
-    public FluidField(int w, int h){
+    public FluidField(int w, int h, TerrainController terrainController){
         density=new double[h][w];
         vx=new double[h][w];
         vy=new double[h][w];
@@ -44,6 +46,8 @@ public class FluidField {
         earthDensity0=new double[h][w];
 
         walls=new Boolean[h][w];
+
+        this.terrainController = terrainController;
 
         this.h=h;
         this.w=w;
@@ -63,7 +67,7 @@ public class FluidField {
                 vx[j][i] = 0;
                 vy[j][i] = 0;
                 walls[j][i] = false;
-                earthDensity[j][i] = 0;
+                earthDensity[j][i] = 0.0;
                 //}
             }
         }
@@ -79,8 +83,6 @@ public class FluidField {
     }
 
     public void step(){
-        dens_step ( N, density, density0, vy, vx, diff, dt );
-        dens_step ( N, earthDensity, earthDensity0, vy, vx, viscE, dt );
         for (int i=0; i<sources.size(); i++){
             int x = sources.get(i).getX();
             int y = sources.get(i).getY();
@@ -88,59 +90,147 @@ public class FluidField {
             setAVG(earthDensity, sources.get(i).getEarthDensity(),x,y);
             setAVG(vx, sources.get(i).getVx(),x,y);
             setAVG(vy, sources.get(i).getVy(),x,y);
+            //System.out.println(sources.get(i).getX()+"\t"+sources.get(i).getY());
         }
+
+        for(int j=0; j<h; j++){
+            for(int i=0; i<w; i++){
+                vx[j][i]=terrainController.getSlope(i/2,j/2)[0];
+                vy[j][i]=terrainController.getSlope(i/2,j/2)[1];
+//                if(walls[j][i]){
+//                    density[j][i]=0;
+//                    density0[j][i]=0;
+//                    earthDensity[j][i]=0;
+//                    earthDensity0[j][i]=0;
+//                }
+                //System.out.println("vx: " + vx[j][i] +"\t vy: " + vy[j][i]);
+            }
+        }
+        dens_step ( N, density, density0, vx, vy, diff, dt );
+        dens_step ( N, earthDensity, earthDensity0, vx, vy, diff, dt );
     }
 
     public void diffuse ( int N, int b, double[][] x, double[][] x0, double diff, double dt )
     {
         int i, j, k;
         double a=dt*diff*N*N;
-        for ( k=0 ; k<20 ; k++ ) {
+        for ( k=0 ; k<10 ; k++ ) {
             for ( i=1 ; i<N-1 ; i++ ) {
                 for ( j=1 ; j<N-1 ; j++ ) {
-                    double add = 0;
-                    int numAdd = 1;
-                    if(israel(i-1,j)){numAdd++; add+=x[j][i-1];}
-                    if(israel(i+1,j)){numAdd++; add+=x[j][i+1];}
-                    if(israel(i,j-1)){numAdd++; add+=x[j-1][i];}
-                    if(israel(i,j+1)){numAdd++; add+=x[j+1][i];}
-                    x[j][i] = (x0[j][i] + a*add)/(1+numAdd*a);
+                    if (!walls[j][i]) {
+                        double add = 0;
+                        int numAdd = 0;
+                        if (israel(i - 1, j)) {
+                            if (!walls[j][i - 1]) {
+                                numAdd++;
+                                add += x0[j][i - 1];
+                            }
+                        }
+                        if (israel(i + 1, j)) {
+                            if (!walls[j][i + 1]) {
+                                numAdd++;
+                                add += x0[j][i + 1];
+                            }
+                        }
+                        if (israel(i, j - 1)) {
+                            if (!walls[j - 1][i]) {
+                                numAdd++;
+                                add += x0[j - 1][i];
+                            }
+                        }
+                        if (israel(i, j + 1)) {
+                            if (!walls[j + 1][i]) {
+                                numAdd++;
+                                add += x0[j + 1][i];
+                            }
+                        }
+
+                        if (israel(i+1, j + 1)) {
+                            if (!walls[j + 1][i+1]) {
+                                numAdd++;
+                                add += x0[j + 1][i+1];
+                            }
+                        }
+                        if (israel(i-1, j + 1)) {
+                            if (!walls[j + 1][i-1]) {
+                                numAdd++;
+                                add += x0[j + 1][i-1];
+                            }
+                        }
+                        if (israel(i-1, j - 1)) {
+                            if (!walls[j - 1][i-1]) {
+                                numAdd++;
+                                add += x0[j - 1][i-1];
+                            }
+                        }
+                        if (israel(i+1, j - 1)) {
+                            if (!walls[j - 1][i+1]) {
+                                numAdd++;
+                                add += x0[j - 1][i+1];
+                            }
+                        }
+                        x[j][i] = (x0[j][i] + a * add) / (1 + numAdd * a);
+                    }
                 }
             }
-            set_bnd ( N-2, b, x );
-            set_wall(N, b, x);
+            //set_bnd ( N, b, x );
+            //set_wall(N, b, x);
         }
     }
 
-    public void advect(int N, int b, double[][] d, double[][] d0, double[][] vx, double[][] vy, double dt){
-        int i, j, i0, j0, i1, j1;
-        double x, y, s0, t0, s1, t1, dt0;
-        dt0 = dt*N;
-        for ( i=1 ; i<N ; i++ ) {
-            for ( j=1 ; j<N ; j++ ) {
-                x = i-dt0*vx[j][i]; y = j-dt0*vy[j][i];
-                i0=(int)x; i1=i0+1;
-                j0=(int)y; j1=j0+1;
-                s1 = x-i0; s0 = 1-s1; t1 = y-j0; t0 = 1-t1;
-                double add1 = 0;
-                if(israel(i0,j0)) add1+=t0*d0[j0][i0];
-                if(israel(i0,j1)) add1+=t1*d0[j1][i0];
-                add1*=s0;
-                double add2 = 0;
-                if(israel(i1,j0)) add2+=t0*d0[j0][i1];
-                if(israel(i1,j1)) add2+=t1*d0[j1][i1];
-                add2*=s1;
-                d[j][i] = add1 + add2;
+//    public void advect(int N, int b, double[][] d, double[][] d0, double[][] vx, double[][] vy, double dt){
+//        int i, j, i0, j0, i1, j1;
+//        double x, y, s0, t0, s1, t1, dt0;
+//        dt0 = dt*N;
+//        for ( i=1 ; i<N ; i++ ) {
+//            for ( j=1 ; j<N ; j++ ) {
+//                x = i-dt0*vx[j][i]; y = j-dt0*vy[j][i];
+//                i0=(int)x; i1=i0+1;
+//                j0=(int)y; j1=j0+1;
+//                s1 = x-i0; s0 = 1-s1; t1 = y-j0; t0 = 1-t1;
+//                double add1 = 0;
+//                if(israel(i0,j0)) add1+=t0*d0[j0][i0];
+//                if(israel(i0,j1)) add1+=t1*d0[j1][i0];
+//                add1*=s0;
+//                double add2 = 0;
+//                if(israel(i1,j0)) add2+=t0*d0[j0][i1];
+//                if(israel(i1,j1)) add2+=t1*d0[j1][i1];
+//                add2*=s1;
+//                d[j][i] = add1 + add2;
+//            }
+//        }
+//        set_bnd ( N, b, d );
+//        set_wall(N, b, d);
+//    }
+    public void move (double[][]x, double[][] x0, double[][]vx, double[][]vy, double dt){
+//        for(int i=0; i<w; i++) {
+//            for (int j = 0; j < h; j++) {
+//            }
+//        }
+        for(int i=0; i<w; i++){
+            for(int j=0; j<h; j++){
+                x[j][i]=0;
+                int nx=i;
+                if(vx[j][i]>0)nx+=1;else nx-=1;
+                int ny=i;
+                if(vy[j][i]>0)ny+=1;else ny-=1;
+                if(israel(nx,ny)){
+                    if(!walls[ny][nx]) {
+                        x[ny][nx] += x0[j][i] * dt;
+                        x0[j][i] -= x0[j][i] * dt;
+                    }
+                }
+                x[j][i]+=x0[j][i];
             }
         }
-        set_bnd ( N, b, d );
     }
 
 
     public void dens_step ( int N, double[][] x, double[][] x0, double[][] u, double[][] v, double diff, double dt )
     {
         swap( x0, x ); diffuse( N, 0, x, x0, diff, dt );
-        swap( x0, x ); advect( N, 0, x, x0, u, v, dt );
+        swap( x0, x ); //advect( N, 0, x, x0, u, v, dt );
+        move(x,x0,vx,vy,dt);
     }
 
     public void set_bnd ( int N, int b, double[][] x )
@@ -228,8 +318,8 @@ public class FluidField {
 
     public void swap(double[][] x, double[][] x0){
         double hold;
-        for (int i=0; i<x.length; i++){
-            for(int j=0; j<x[0].length; j++) {
+        for (int i=0; i<w; i++){
+            for(int j=0; j<h; j++) {
                 hold = x[j][i];
                 x[j][i] = x0[j][i];
                 x0[j][i] = hold;
@@ -302,6 +392,7 @@ public class FluidField {
                 sources.get(i).setDensity(density);
                 sources.get(i).setVx(vx);
                 sources.get(i).setVy(vy);
+                sources.get(i).setEarthDensity(earthDensity);
                 found = true;
             }
         }
