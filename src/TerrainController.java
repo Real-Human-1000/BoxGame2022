@@ -27,15 +27,19 @@ public class TerrainController {
         // Worley noise algorithm taken from an older project I did, which was inspired by the worley noise wikipedia page
         terrain = new double[height][width];
 
+        // Create a bunch of points to define the terrain
         double[][] points = new double[(int)Math.sqrt(height*height + width*width)][2]; // (int)Math.sqrt(height*width)
 
+        // Randomize the points' location
         for (double[] point : points) {
             point[0] = Math.random() * width;
             point[1] = Math.random() * height;
         }
 
+        // For each location in the array
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
+                // Each spot gets a value dependent on the distance to the earest point
 
                 double distdist = Double.MAX_VALUE;
 
@@ -98,7 +102,7 @@ public class TerrainController {
         for (int r = 0; r < 1; r++) {
             // Set starting point of river channel and add water source
             double[] pos = {Math.random()*width, Math.random()*height/2};
-            ffield.addSource((int)pos[0], (int)pos[1], 0.1, 0.001, 1, 0); // Does positive == down? probably
+            ffield.addSource((int)pos[0], (int)pos[1], 0.1, 0.001, 1, 0);
 
             while (terrain[(int)pos[1]][(int)pos[0]] > seaLevel/2) {
                 if (terrain[(int)pos[1]][(int)pos[0]] > seaLevel*0.75)
@@ -172,7 +176,7 @@ public class TerrainController {
     public void stepAndUpdate() {
         // Steps fluid field and updates terrain
         ffield.step();
-        update();
+        //update();
     }
 
     public double getTerrainAt(int x, int y) {
@@ -225,6 +229,21 @@ public class TerrainController {
         }
 
         return slope;
+    }
+
+    public void addSource(int x, int y, double density, double earthDensity, double vx, double vy) {
+        // Add water source
+        ffield.addSource(x, y, density, earthDensity, vx, vy);
+    }
+
+    public void addTerrain(int x, int y, double amount) {
+        // Add some terrain somewhere
+        terrain[y][x] = Math.max(0, Math.min(terrain[y][x] + amount, 1));
+    }
+
+    public void addWater(int x, int y, double amount) {
+        // Add some water -- I would not recommend using this, but whatevs
+        ffield.setDensity(x, y, Math.max(0, Math.min(ffield.getDensity(x, y) + amount, 1)));
     }
 
     public void printArray(double[][] arr) {
