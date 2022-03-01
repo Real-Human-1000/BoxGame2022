@@ -3,25 +3,27 @@ import java.awt.event.MouseMotionListener;
 import java.util.ArrayList;
 
 public class FluidField {
-    private double[] density;
-    private double[] vx;
-    private double[] vy;
+    private double[][] density;
+    private double[][] vx;
+    private double[][] vy;
 
-    private double[] density0;
-    private double[] vx0;
-    private double[] vy0;
+    private double[][] density0;
+    private double[][] vx0;
+    private double[][] vy0;
 
-    private double[] earthDensity;
-    private double[] earthDensity0;
+    private double[][] earthDensity;
+    private double[][] earthDensity0;
 
-    private Boolean[] walls;
+    private Boolean[][] walls;
 
     private int h;
     private int w;
+    private int size=2;
 
-    private double dt=0.1;
-    private double visc = 0.0001; // 0.0001
-    private double diff = 0.0001;
+    private double dt=0.0001;
+    private double visc = 0.1;
+    private double viscE = 0.99;
+    private double diff = 0.0000001;
     private int N;
 
     private double t;
@@ -31,17 +33,17 @@ public class FluidField {
 //    private boolean mdown = false;
 //    private boolean state0 = false;
     public FluidField(int w, int h){
-        density=new double[h*w];
-        vx=new double[h*w];
-        vy=new double[h*w];
-        earthDensity=new double[h*w];
+        density=new double[h][w];
+        vx=new double[h][w];
+        vy=new double[h][w];
+        earthDensity=new double[h][w];
 
-        density0=new double[h*w];
-        vx0=new double[h*w];
-        vy0=new double[h*w];
-        earthDensity0=new double[h*w];
+        density0=new double[h][w];
+        vx0=new double[h][w];
+        vy0=new double[h][w];
+        earthDensity0=new double[h][w];
 
-        walls=new Boolean[h*w];
+        walls=new Boolean[h][w];
 
         this.h=h;
         this.w=w;
@@ -52,57 +54,57 @@ public class FluidField {
         for(int i=0; i<w; i++){
             for(int j=0; j<h; j++) {
 //                if (i!=0 && j!=0 && i!=w-1 && j!=h-1) {
-//                    density[IX(i,j)] = Math.random();
-//                    vx[IX(i,j)] = Math.random() - 0.5;
-//                    vy[IX(i,j)] = Math.random() - 0.5;
-//                    walls[IX(i,j)] = false;
+//                    density[j][i] = Math.random();
+//                    vx[j][i] = Math.random() - 0.5;
+//                    vy[j][i] = Math.random() - 0.5;
+//                    walls[j][i] = false;
 //                } else {
-                density[IX(i,j)] = 0.1;
-                vx[IX(i,j)] = 0;
-                vy[IX(i,j)] = 0;
-                walls[IX(i,j)] = false;
-                earthDensity[IX(i,j)] = 0;
+                density[j][i] = 0.0;
+                vx[j][i] = 0;
+                vy[j][i] = 0;
+                walls[j][i] = false;
+                earthDensity[j][i] = 0;
                 //}
             }
         }
-        for(int i=0; i<h*w; i++){
-            density0[i]=density[i];
-            vx0[i]=vx[i];
-            vy0[i]=vy[i];
-            earthDensity0[i]=earthDensity[i];
+        for(int i=0; i<w; i++){
+            for(int j=0; j<h; j++) {
+                density0[j][i] = density[j][i];
+                vx0[j][i] = vx[j][i];
+                vy0[j][i] = vy[j][i];
+                earthDensity0[j][i] = earthDensity[j][i];
+            }
         }
 
     }
 
     public void step(){
-        for(int i=0; i<walls.length; i++){
-            if(walls[i]){
-                density[i]=0;
-                vx[0]=0;
-                vy[0]=0;
-            }
-        }
-        vel_step ( N, vy, vx, vy0, vx0, visc, dt );
         dens_step ( N, density, density0, vy, vx, diff, dt );
-        dens_step ( N, earthDensity, earthDensity0, vy, vx, diff, dt );
+        dens_step ( N, earthDensity, earthDensity0, vy, vx, viscE, dt );
         for (int i=0; i<sources.size(); i++){
             int x = sources.get(i).getX();
             int y = sources.get(i).getY();
-            density[IX(x,y)]=sources.get(i).getDensity();
-            earthDensity[IX(x,y)]=sources.get(i).getEarthDensity();
-            vx[IX(x,y)]=sources.get(i).getVx();
-            vy[IX(x,y)]=sources.get(i).getVy();
+            setAVG(density, sources.get(i).getDensity(),x,y);
+            setAVG(earthDensity, sources.get(i).getEarthDensity(),x,y);
+            setAVG(vx, sources.get(i).getVx(),x,y);
+            setAVG(vy, sources.get(i).getVy(),x,y);
         }
     }
 
-    public void diffuse ( int N, int b, double[] x, double[] x0, double diff, double dt )
+    public void diffuse ( int N, int b, double[][] x, double[][] x0, double diff, double dt )
     {
         int i, j, k;
         double a=dt*diff*N*N;
         for ( k=0 ; k<20 ; k++ ) {
             for ( i=1 ; i<N-1 ; i++ ) {
                 for ( j=1 ; j<N-1 ; j++ ) {
-                    x[IX(i,j)] = (x0[IX(i,j)] + a*(x[IX(i-1,j)]+x[IX(i+1,j)]+x[IX(i,j-1)]+x[IX(i,j+1)]))/(1+4*a);
+                    double add = 0;
+                    int numAdd = 1;
+                    if(israel(i-1,j)){numAdd++; add+=x[j][i-1];}
+                    if(israel(i+1,j)){numAdd++; add+=x[j][i+1];}
+                    if(israel(i,j-1)){numAdd++; add+=x[j-1][i];}
+                    if(israel(i,j+1)){numAdd++; add+=x[j+1][i];}
+                    x[j][i] = (x0[j][i] + a*add)/(1+numAdd*a);
                 }
             }
             set_bnd ( N-2, b, x );
@@ -110,147 +112,163 @@ public class FluidField {
         }
     }
 
-    public void advect ( int N, int b, double[] d, double[] d0, double[] u, double[] v, double dt )
-    {
+    public void advect(int N, int b, double[][] d, double[][] d0, double[][] vx, double[][] vy, double dt){
         int i, j, i0, j0, i1, j1;
         double x, y, s0, t0, s1, t1, dt0;
         dt0 = dt*N;
-        for ( i=1 ; i<N-1 ; i++ ) {
-            for ( j=1 ; j<N-1 ; j++ ) {
-                x = i-dt0*u[IX(i,j)]; y = j-dt0*v[IX(i,j)];
-                if (x<0.5) x=0.5; if (x>N-2+0.5) x=N-2+ 0.5; i0=(int)x; i1=i0+1;
-                if (y<0.5) y=0.5; if (y>N-2+0.5) y=N-2+ 0.5; j0=(int)y; j1=j0+1;
+        for ( i=1 ; i<N ; i++ ) {
+            for ( j=1 ; j<N ; j++ ) {
+                x = i-dt0*vx[j][i]; y = j-dt0*vy[j][i];
+                i0=(int)x; i1=i0+1;
+                j0=(int)y; j1=j0+1;
                 s1 = x-i0; s0 = 1-s1; t1 = y-j0; t0 = 1-t1;
-                d[IX(i,j)] = s0*(t0*d0[IX(i0,j0)]+t1*d0[IX(i0,j1)])+s1*(t0*d0[IX(i1,j0)]+t1*d0[IX(i1,j1)]);
+                double add1 = 0;
+                if(israel(i0,j0)) add1+=t0*d0[j0][i0];
+                if(israel(i0,j1)) add1+=t1*d0[j1][i0];
+                add1*=s0;
+                double add2 = 0;
+                if(israel(i1,j0)) add2+=t0*d0[j0][i1];
+                if(israel(i1,j1)) add2+=t1*d0[j1][i1];
+                add2*=s1;
+                d[j][i] = add1 + add2;
             }
         }
-        set_bnd ( N-1, b, d );
-        set_wall(N, b, d);
+        set_bnd ( N, b, d );
     }
 
-    public void dens_step ( int N, double[] x, double[] x0, double[] u, double[] v, double diff, double dt )
+
+    public void dens_step ( int N, double[][] x, double[][] x0, double[][] u, double[][] v, double diff, double dt )
     {
         swap( x0, x ); diffuse( N, 0, x, x0, diff, dt );
         swap( x0, x ); advect( N, 0, x, x0, u, v, dt );
     }
 
-    public void vel_step ( int N, double[] u, double[] v, double[] u0, double[] v0,
-                           double visc, double dt )
-    {
-        swap ( u0, u ); diffuse ( N, 1, u, u0, visc, dt );
-        swap ( v0, v ); diffuse ( N, 2, v, v0, visc, dt );
-        project ( N, u, v, u0, v0 );
-        swap ( u0, u ); swap ( v0, v );
-        advect ( N, 1, u, u0, u0, v0, dt ); advect ( N, 2, v, v0, u0, v0, dt );
-        project ( N, u, v, u0, v0 );
-    }
-
-    public void project ( int N, double[] u, double[] v, double[] p, double[] div )
-    {
-        int i, j, k;
-        double h;
-        h = 1.0/N;
-        for ( i=1 ; i<N-1 ; i++ ) {
-            for ( j=1 ; j<N-1 ; j++ ) {
-                div[IX(i,j)] = -0.5*h*(u[IX(i+1,j)]-u[IX(i-1,j)]+
-                        v[IX(i,j+1)]-v[IX(i,j-1)]);
-                p[IX(i,j)] = 0;
-            }
-        }
-        set_bnd ( N-2, 0, div ); set_bnd ( N-2, 0, p );
-        for ( k=0 ; k<20 ; k++ ) {
-            for ( i=1 ; i<N-1 ; i++ ) {
-                for ( j=1 ; j<N-1 ; j++ ) {
-                    p[IX(i,j)] = (div[IX(i,j)]+p[IX(i-1,j)]+p[IX(i+1,j)]+
-                            p[IX(i,j-1)]+p[IX(i,j+1)])/4;
-                }
-            }
-            set_bnd ( N-1, 0, p );
-        }
-        for ( i=1 ; i<N-1 ; i++ ) {
-            for ( j=1 ; j<N-1 ; j++ ) {
-                u[IX(i,j)] -= 0.5*(p[IX(i+1,j)]-p[IX(i-1,j)])/h;
-                v[IX(i,j)] -= 0.5*(p[IX(i,j+1)]-p[IX(i,j-1)])/h;
-            }
-        }
-        set_bnd ( N-1, 1, u ); set_bnd ( N-2, 2, v );
-        set_wall(N,1, u); set_wall(N,1, v);
-    }
-
-    public void set_bnd ( int N, int b, double[] x )
+    public void set_bnd ( int N, int b, double[][] x )
     {
         int i;
         //N=N-2;
         for ( i=1 ; i<=N ; i++ ) {
             if ((b == 1)) {
-                x[IX(0, i)] = -x[IX(1, i)];
+                if(israel(0,i)&&israel(1,i))
+                x[i][0] = -x[i][1];
             } else {
-                x[IX(0, i)] = x[IX(1, i)];
+                if(israel(0,i)&&israel(1,i))
+                x[i][0] = x[i][1];
             }
             if ((b == 1)) {
-                //x[IX(N+1,i)] = -x[IX(N,i)];
+                if(israel(i,N+1)&&israel(i,N))
+                x[i][N+1] = -x[i][N];
             } else {
-                //x[IX(N+1,i)] = x[IX(N,i)];
+                if(israel(i,N+1)&&israel(i,N))
+                x[i][N+1] = x[i][N];
             }
             if ((b == 2)) {
-                x[IX(i,0 )] = -x[IX(i,1)];
+                if(israel(i,0)&&israel(i,1))
+                x[0][i] = -x[1][i];
             } else {
-                x[IX(i, 0)] = x[IX(i,1)];
+                if(israel(i,0)&&israel(i,1))
+                x[0][i] = x[1][i];
             }
             if ((b == 2)) {
-                x[IX(i,0 )] = -x[IX(i,N)];
+                if(israel(i,0)&&israel(i,N))
+                x[0][i] = -x[N][i];
             } else {
-                x[IX(i, 0)] = x[IX(i,N)];
+                if(israel(i,0)&&israel(i,N))
+                x[0][i] = x[N][i];
             }
 
         }
-        x[IX(0 ,0 )] = 0.5*(x[IX(1,0 )]+x[IX(0 ,1)]);
-        x[IX(0 ,N+1)] = 0.5*(x[IX(1,N+1)]+x[IX(0 ,N )]);
-        x[IX(N+1,0 )] = 0.5*(x[IX(N,0 )]+x[IX(N+1,1)]);
-        x[IX(N+1,N+1)] = 0.5*(x[IX(N,N+1)]+x[IX(N+1,N )]);
+        if(israel(0,0)&&israel(1,0)&&israel(0,1))
+        x[0][0] = 0.5*(x[0][1]+x[1][0]);
+        if(israel(0,N+1)&&israel(1,N+1)&&israel(0,N))
+        x[N+1][0] = 0.5*(x[N+1][1]+x[N][0]);
+        if(israel(N+1,0)&&israel(N,0)&&israel(N+1,1))
+        x[0][N+1] = 0.5*(x[0][N]+x[1][N+1]);
+        if(israel(N+1,N+1)&&israel(N,N+1)&&israel(N+1,N))
+        x[N+1][N+1] = 0.5*(x[N+1][N]+x[N][N+1]);
     }
 
-    public void set_wall ( int N, int b, double[] x)
+    public void set_wall ( int N, int b, double[][] x)
     {
         int i, j;
         //N=N-4;
         for ( i=1 ; i<N-1 ; i++ ){
             for ( j=1; j<N-1; j++) {
-                if ((b == 1) && walls[IX(i,j)]) {
-                    x[IX(i, j)] = -x[IX(i+1, j)];
+                if ((b == 1) && walls[j][i]) {
+                    if(israel(i,j)&&israel(i+1,j))
+                    x[j][i] = -x[j][i+1];
                 } else {
-                    x[IX(i, j)] = x[IX(i, j)];
+                    if(israel(i,j)&&israel(i,j))
+                    x[j][i] = x[j][i];
                 }
-                if ((b == 1) && walls[IX(i,j)]) {
-                    x[IX(i+1, j)] = -x[IX(i, j)];
+                if ((b == 1) && walls[j][i]) {
+                    if(israel(i+1,j)&&israel(i,j))
+                    x[j][i+1] = -x[j][i];
                 } else {
-                    x[IX(i, j)] = x[IX(i, j)];
+                    if(israel(i,j)&&israel(i,j))
+                    x[j][i] = x[j][i];
                 }
-                if ((b == 2) && walls[IX(i,j)]) {
-                    x[IX(i, j)] = -x[IX(i, j+1)];
+                if ((b == 2) && walls[j][i]) {
+                    if(israel(i,j)&&israel(i,j+1))
+                    x[j][i] = -x[j+1][i];
                 } else {
-                    x[IX(i, j)] = x[IX(i, j)];
+                    if(israel(i,j)&&israel(i,j))
+                    x[j][i] = x[j][i];
                 }
-                if ((b == 2) && walls[IX(i,j)]) {
-                    x[IX(i, j)] = -x[IX(i, j-1)];
+                if ((b == 2) && walls[j][i]) {
+                    if(israel(i,j)&&israel(i,j-1))
+                    x[j][i] = -x[j-1][i];
                 } else {
-                    x[IX(i, j)] = x[IX(i, j)];
+                    if(israel(i,j)&&israel(i,j))
+                    x[j][i] = x[j][i];
                 }
             }
         }
     }
 
-    public void swap(double[] x, double[] x0){
+    public void swap(double[][] x, double[][] x0){
         double hold;
         for (int i=0; i<x.length; i++){
-            hold=x[i];
-            x[i]=x0[i];
-            x0[i]=hold;
+            for(int j=0; j<x[0].length; j++) {
+                hold = x[j][i];
+                x[j][i] = x0[j][i];
+                x0[j][i] = hold;
+            }
         }
     }
 
-    public int IX(int i,int j){
-        if(j*h+i<w*h) return j*h+i; else return 0 ;
+    public boolean israel(int i, int j){
+        if(i<w && i>=0 && j<h && j>=0){
+            return true;
+        }
+        return false;
+    }
+
+    public double IXAVG(double[][] d, int x, int y){
+        int numTiles = 4;
+        if (x*size == w - 1) { numTiles -= 1; } // Left or right side
+        if (y*size == h - 1) { numTiles -= 1; } // Top or bottom
+
+        double v = 0;
+        v +=d[y*size][x*size];
+        if (x*size < w-2) { v+=d[y*size][x*size+1]; }
+        if (x*size < w-2 && y*size < h-2 ){ v+=d[y*size+1][x*size+1]; }
+        if (y*size < h-2) { v+=d[y*size+1][x*size]; }
+        return v/numTiles;
+    }
+    public void setAVG(double[][] d, double set, int x, int y){
+        if(israel(x*size,y*size))
+        d[y*size][x*size]=set;
+        if (x*size < w-2) { d[y*size][x*size+1]=set; }
+        if (x*size < w-2 && y*size < h-2) { d[y*size+1][x*size]=set; }
+        if (y*size < h-2) { d[y*size+1][x*size]=set; }
+    }
+    public void setAVGB(Boolean[][] d, boolean set, int x, int y){
+        if(israel(x*size,y*size))
+        d[y*size][x*size]=set;
+        if (x*size < w-2) { d[y*size][x*size+1]=set; }
+        if (x*size < w-2 && y*size < h-2) { d[y*size+1][x*size+1]=set; }
+        if (y*size < h-2) { d[y*size+1][x*size]=set; }
     }
 
     public int getH() {
@@ -260,22 +278,22 @@ public class FluidField {
         return w;
     }
 
-    public double[] getDensityArr(){ return density; }
-    public double[] getVxArr(){ return vx; }
-    public double[] getVyArr(){ return vy; }
-    public Boolean[] getWalls(){ return walls; }
+    public double[][] getDensityArr(){ return density; }
+    public double[][] getVxArr(){ return vx; }
+    public double[][] getVyArr(){ return vy; }
+    public Boolean[][] getWalls(){ return walls; }
 
-    public Boolean getWall(int i, int j){ return walls[IX(i,j)]; }
-    public double getDensity(int i, int j){ return density[IX(i,j)]; }
-    public double getVx(int i, int j){ return vx[IX(i,j)]; }
-    public double getVy(int i, int j){ return vy[IX(i,j)]; }
+    public Boolean getWall(int i, int j){ return walls[j][i]; }
+    public double getDensity(int i, int j){ return IXAVG(density,i,j); }
+    public double getVx(int i, int j){ return IXAVG(vx,i,j); }
+    public double getVy(int i, int j){ return IXAVG(vy,i,j); }
 
-    public void setWall(int i, int j, boolean b){ walls[IX(i,j)]=b; }
-    public void setDensity(int i, int j, double d){ density[IX(i,j)]=d; }
-    public void setVx(int i, int j, double v){ vx[IX(i,j)]=v; }
-    public void setVy(int i, int j, double v){ vy[IX(i,j)]=v; }
-    public void setEarthDensity(int i, int j, double d){ earthDensity[IX(i,j)]=d; }
-    public double getEarthDensity(int i, int j){ return earthDensity[IX(i,j)]; }
+    public void setWall(int i, int j, boolean b){ setAVGB(walls,b,i,j); }
+    public void setDensity(int i, int j, double d){ setAVG(density,d,i,j); }
+    public void setVx(int i, int j, double v){ setAVG(vx,v,i,j); }
+    public void setVy(int i, int j, double v){ setAVG(vy,v,i,j); }
+    public void setEarthDensity(int i, int j, double d){ setAVG(earthDensity,d,i,j); }
+    public double getEarthDensity(int i, int j){ return IXAVG(earthDensity,i,j); }
 
     public void addSource(int x, int y, double density, double earthDensity, double vx, double vy){
         boolean found = false;
