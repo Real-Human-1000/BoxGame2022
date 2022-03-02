@@ -7,31 +7,36 @@ import javax.swing.*;
 public class GridDemoFrame extends JFrame implements ActionListener
 {
 	GridDemoPanel thePanel;
+	Box uiPanel;
 	JLabel scoreLabel, messageLabel;
 	JButton regenerateButton, addEarthButton, addWaterButton;
+	JTextField numRowsField, numColsField;
 	JToggleButton disableFlipButton, pModeButton;
 	JComboBox paletteSelector;
 	public GridDemoFrame()
 	{
 		super("Grid Demo");
 		
-		setSize(600,600+24+16);
+		//setSize(Cell.CELL_SIZE*GridDemoPanel.NUM_COLS,Cell.CELL_SIZE*GridDemoPanel.NUM_ROWS+80);
 		
 		this.getContentPane().setLayout(new BorderLayout());
 		thePanel = new GridDemoPanel(this);
 		scoreLabel = new JLabel("Score: 0");
 		messageLabel = new JLabel("");
-		Box southPanel = Box.createHorizontalBox();
+		//Box southPanel = Box.createHorizontalBox();
 
 
-		this.getContentPane().add(buildUIPanel(),BorderLayout.NORTH);
+		uiPanel = buildUIPanel();
+		this.getContentPane().add(uiPanel,BorderLayout.NORTH);
 		this.getContentPane().add(thePanel,BorderLayout.CENTER);
-		this.getContentPane().add(southPanel, BorderLayout.SOUTH);
-		southPanel.add(Box.createHorizontalStrut(10));
-		southPanel.add(scoreLabel, BorderLayout.SOUTH);
-		southPanel.add(Box.createGlue());
-		southPanel.add(messageLabel, BorderLayout.SOUTH);
-		southPanel.add(Box.createHorizontalStrut(10));
+		//this.getContentPane().add(southPanel, BorderLayout.SOUTH);
+		//southPanel.add(Box.createHorizontalStrut(10));
+		//southPanel.add(scoreLabel, BorderLayout.SOUTH);
+		//southPanel.add(Box.createGlue());
+		//southPanel.add(messageLabel, BorderLayout.SOUTH);
+		//southPanel.add(Box.createHorizontalStrut(10));
+
+		setSize(Cell.CELL_SIZE*GridDemoPanel.NUM_COLS,Cell.CELL_SIZE*GridDemoPanel.NUM_ROWS+100);
 		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setVisible(true);
@@ -71,9 +76,32 @@ public class GridDemoFrame extends JFrame implements ActionListener
 		regenerateButton.addActionListener(this);
 		genBox.add(regenerateButton);
 
+		numRowsField = new JTextField(3);
+		JLabel rowsLabel = new JLabel("Set Size");
+		rowsLabel.setLabelFor(numRowsField);
+		//numColsField = new JTextField(3);
+		//JLabel colsLabel = new JLabel("Set Number of Columns");
+		//colsLabel.setLabelFor(numColsField);
+		genBox.add(rowsLabel);
+		genBox.add(numRowsField);
+
+		//no support for not square dimensions
+		//genBox.add(colsLabel);
+		//genBox.add(numColsField);
+
 		genBox.setBorder(BorderFactory.createTitledBorder("Generation"));
 
 		return genBox;
+	}
+
+	private int getNewDimension(JTextField field,int fallBackValue){
+		int n;
+		try{
+			n = Integer.parseInt(field.getText());
+		}catch(NumberFormatException e){
+			n = fallBackValue;
+		}
+		return n;
 	}
 
 	private Box buildMouseModeBox(){
@@ -129,8 +157,15 @@ public class GridDemoFrame extends JFrame implements ActionListener
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == regenerateButton)
+		if (e.getSource() == regenerateButton) {
+			GridDemoPanel.setDimensions(
+					getNewDimension(numRowsField,GridDemoPanel.NUM_ROWS)
+					//,getNewDimension(numColsField,GridDemoPanel.NUM_COLS)
+			);
+			setSize(Cell.CELL_SIZE*GridDemoPanel.NUM_COLS,
+					Cell.CELL_SIZE*GridDemoPanel.NUM_ROWS+uiPanel.getHeight());
 			thePanel.regenerateTerrain();
+		}
 		if (e.getSource() == addEarthButton)
 			GridDemoPanel.setAddMode(false);
 		if (e.getSource() == addWaterButton)

@@ -12,12 +12,12 @@ public class GridDemoPanel extends JPanel implements MouseListener, KeyListener
 {
 	private Cell[][] theGrid;
 	private double[][] terrainMap;
-	public final static int NUM_ROWS = 70;
-	public final static int NUM_COLS = 70;
+	public static int NUM_ROWS = 70;
+	public static int NUM_COLS = 70;
 	public GridDemoFrame myParent;
 	public TerrainController terrainController;
 	public int score;
-	public double deltaTime = 0;
+	public static double deltaTime = 0;
 	public static boolean performanceMode;
 	public static int[] flipThresholds = new int[]{50,10,10,1,1,10,10,10};
 	public static boolean forcePerformanceMode = false;
@@ -152,7 +152,7 @@ public class GridDemoPanel extends JPanel implements MouseListener, KeyListener
 					//theGrid[r][c].setColorID(new Color(capColor(Math.sqrt(slope[0]*slope[0] + slope[1]*slope[1]) * 1024), 64, 64));
 				}
 
-				theGrid[r][c].drawSelf(g, deltaTime, performanceMode);
+				theGrid[r][c].drawSelf(g);
 			}
 	}
 	
@@ -196,6 +196,16 @@ public class GridDemoPanel extends JPanel implements MouseListener, KeyListener
 
 	public static int getFlipThreshold(){
 		return GridDemoPanel.flipThresholds[GridDemoPanel.palette];
+	}
+
+	public static void setDimensions(int rows, int cols){
+		GridDemoPanel.NUM_ROWS = rows+rows%2;
+		GridDemoPanel.NUM_COLS = cols+rows%2;
+	}
+
+	public static void setDimensions(int dims){
+		GridDemoPanel.NUM_ROWS = dims;
+		GridDemoPanel.NUM_COLS = dims;
 	}
 
 	//============================ Mouse Listener Overrides ==========================
@@ -295,11 +305,11 @@ public class GridDemoPanel extends JPanel implements MouseListener, KeyListener
 	{
 		//theGrid[0][0].cycleColorIDBackward();
 		//System.out.println("step");
-		deltaTime = millisecondsSinceLastStep;
+		GridDemoPanel.deltaTime = millisecondsSinceLastStep;
 
 		terrainController.stepAndUpdate();
 		GridDemoPanel.performanceMode = forcePerformanceMode;
-		if (deltaTime>=12){
+		if (GridDemoPanel.deltaTime>=12){
 			GridDemoPanel.performanceMode = true;
 		}
 		repaint();

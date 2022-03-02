@@ -24,10 +24,8 @@ public class Cell
 	GraphicsConfiguration myGC = null;
 
 	private VolatileImage myDrip; //the cell's current appearance, buffered for performance
-	private double millisSinceLastFlip = 0;//keeps cells from flipping too often.
-	private boolean inPerformanceMode = false;
 
-	private boolean willNeverBeBallin = false;
+	private boolean willNeverBeBallin = false; //Checks whether or not cell's appearance is up to date
 
 
 
@@ -169,13 +167,13 @@ public class Cell
 		isLive = b;
 	}
 	// =============================   DRAW SELF ================================
-	public void createDrip(){
+	public void createDrip(){ //Creates a totally new image (eg if the color of the image has changed)
 		myDrip = myGC.createCompatibleVolatileImage(CELL_SIZE,CELL_SIZE);
 		restoreDrip();
 		willNeverBeBallin = false;
 	}
 
-	private void restoreDrip(){
+	private void restoreDrip(){//Creates an image for the cell
 		do{
 			if(myDrip.validate(myGC)==VolatileImage.IMAGE_INCOMPATIBLE){
 				myDrip = myGC.createCompatibleVolatileImage(CELL_SIZE,CELL_SIZE);
@@ -199,6 +197,8 @@ public class Cell
 	}
 
 	private void drawMyDrip(Graphics g){
+		//Validates cell's current image (myDrip) and restores it if the image has been lost,
+		//otherwise draws image
 		boolean dripRestored = false;
 		int attemptsToRestore = 2;
 		if(myDrip == null)
@@ -226,16 +226,13 @@ public class Cell
 	}
 
 
-	public void drawSelf(Graphics g,double deltaTime,boolean performanceMode)
+	public void drawSelf(Graphics g)
 	{
 		if (!isLive)
 			return;
 		Graphics2D g2 = (Graphics2D)g.create();
-		millisSinceLastFlip+= deltaTime;
-		inPerformanceMode = performanceMode;
 		if(colorChanged){
-			flipManager.setG(g);
-			flipManager.updateAnim(deltaTime,performanceMode);
+			flipManager.updateAnim(g);
 			//colorChanged = false;
 		}else{
 				flipManager = null;
