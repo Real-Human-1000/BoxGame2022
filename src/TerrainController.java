@@ -9,15 +9,16 @@ public class TerrainController {
         this.width = w;
         this.height = h;
         this.seaLevel = 0.3;
-        this.ffield = new FluidField(h*2, w*2);  // Jack tells me to keep this a square
+        this.ffield = new FluidField(h*2, w*2, this);  // Jack tells me to keep this a square
 
         //worleyTerrain();  // For islands. Not great, but it's what we got
         polyTerrain();  // Good for rivers
-        for(int x=0; x<w; x++){
-            for(int y=0; y<h; y++){
-                ffield.setEarthDensity(x,y,terrain[y][x]);
-            }
-        }
+//        for(int x=0; x<w; x++){
+//            for(int y=0; y<h; y++){
+//                ffield.setEarthDensity(x,y,terrain[y][x]);
+//            }
+//        }
+        updateWalls();
         //snazzyDisplay();
     }
 
@@ -101,8 +102,8 @@ public class TerrainController {
         // Create some starting rivers
         for (int r = 0; r < 1; r++) {
             // Set starting point of river channel and add water source
-            double[] pos = {Math.random()*width, Math.random()*height/2};
-            ffield.addSource((int)pos[0], (int)pos[1], 0.1, 0.001, 1, 0);
+            double[] pos = {Math.random()*((double)width*0.875)+((double)width*0.0625), Math.random()*height/2};
+            ffield.addSource((int)pos[0], (int)pos[1], 0.1, 0.001, 0, 0);
 
             while (terrain[(int)pos[1]][(int)pos[0]] > seaLevel/2) {
                 if (terrain[(int)pos[1]][(int)pos[0]] > seaLevel*0.75)
@@ -123,6 +124,19 @@ public class TerrainController {
                 if (pos[1] > height-1) { pos[1] = height-1; }
             }
         }
+
+        // Make a wall around the map because I don't trust Jack's code to stop fluid escaping
+        for (int w = 0; w < width; w++) {
+            terrain[height-1][w] = 1;
+            terrain[height-2][w] = 1;
+        }
+        for (int w = 0; w < height; w++) {
+            terrain[w][0] = 1;
+            terrain[w][1] = 1;
+            terrain[w][width-1] = 1;
+            terrain[w][width-2] = 1;
+        }
+        // It doesn't seem to work / fluid escaping isn't the problem
     }
 
     public void update() {
@@ -151,32 +165,43 @@ public class TerrainController {
                     deltaTerrain = Math.min((1 - speed) * ffield.getDensity(x, y) * ffield.getEarthDensity(x, y) / 100, ffield.getEarthDensity(x, y));
                 }
 
-                ffield.setEarthDensity(x, y, ffield.getEarthDensity(x, y) + deltaTerrain);
-
-                // Split up sediment among neighboring tiles
-                int numTiles = 5;
-                if (x == 0 || x == width - 1) { numTiles -= 1; } // Left or right side
-                if (y == 0 || y == height - 1) { numTiles -= 1; } // Top or bottom
-
+//                ffield.setEarthDensity(x, y, ffield.getEarthDensity(x, y) + deltaTerrain);
+//
+//                // Split up sediment among neighboring tiles
+//                int numTiles = 5;
+//                if (x == 0 || x == width - 1) { numTiles -= 1; } // Left or right side
+//                if (y == 0 || y == height - 1) { numTiles -= 1; } // Top or bottom
+//
 //                terrain[y][x] += deltaTerrain/numTiles;
 //                if (x > 0) { terrain[y][x-1] += deltaTerrain/numTiles; }
 //                if (x < width-1) { terrain[y][x+1] += deltaTerrain/numTiles; }
 //                if (y > 0) { terrain[y-1][x] += deltaTerrain/numTiles; }
 //                if (y < height-1) { terrain[y+1][x] += deltaTerrain/numTiles; }
-                terrain[y][x]=ffield.getEarthDensity(x,y);
+//                terrain[y][x]=ffield.getEarthDensity(x,y);
 
                 // Change wall status
-//                ffield.setWall(x, y, terrain[y][x] > this.seaLevel);
+                ffield.setWall(x, y, terrain[y][x] > this.seaLevel);
 //                ffield.setVx(x, y, ffield.getVx(x, y) - Math.min(terrain[y][x]*2,1) * ffield.getVx(x, y));
 //                ffield.setVy(x, y, ffield.getVy(x, y) - Math.min(terrain[y][x]*2,1) * ffield.getVy(x, y));
             }
         }
     }
 
+    public void updateWalls() {
+        // Separate function for updating walls
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                ffield.setWall(x, y, terrain[y][x] > this.seaLevel);
+            }
+        }
+    }
+
     public void stepAndUpdate() {
         // Steps fluid field and updates terrain
-        ffield.step();
-        //update();
+        for (int i = 0; i < 1; i++) {
+            ffield.step();
+        }
+        // update();
     }
 
     public double getTerrainAt(int x, int y) {

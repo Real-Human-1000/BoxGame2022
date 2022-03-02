@@ -19,7 +19,7 @@ public class GridDemoPanel extends JPanel implements MouseListener, KeyListener
 	public int score;
 	public double deltaTime = 0;
 	public boolean performanceMode;
-	public static int[] flipThresholds = new int[]{50,10,10,1,1,10,10};
+	public static int[] flipThresholds = new int[]{50,10,10,1,1,10,10,10};
 	public static boolean forcePerformanceMode = false;
 	public static boolean doFlipAnims = true;
 	public static boolean addMode = true; //True for add water, false for sediment;
@@ -163,11 +163,9 @@ public class GridDemoPanel extends JPanel implements MouseListener, KeyListener
 	 */
 	public void userClickedCell(int row, int col)
 	{
-		System.out.println("("+row+", "+col+")");
+		System.out.println("("+col+", "+row+") --> Terrain: " + terrainMap[row][col] + ", Water: " + terrainController.getFluidAt(col, row));
 	}
-	
-	
-	
+
 	
 	/**
 	 * Here's an example of a simple dialog box with a message.
@@ -211,16 +209,9 @@ public class GridDemoPanel extends JPanel implements MouseListener, KeyListener
 		// TODO Auto-generated method stub
 		// mouse location is at e.getX() , e.getY().
 		// if you wish to convert to the rows and columns, you can integer-divide by the cell size.
-//		int col = e.getX()/Cell.CELL_SIZE;
-//		int row = e.getY()/Cell.CELL_SIZE;
-//		userClickedCell(row,col);
-		if (palette == 0) {
-			palette = 7;
-		}
-		else if (palette == 7) {
-			palette = 0;
-		}
-		repaint();
+		int col = e.getX()/Cell.CELL_SIZE;
+		int row = e.getY()/Cell.CELL_SIZE;
+		userClickedCell(row,col);
 	}
 
 	@Override
