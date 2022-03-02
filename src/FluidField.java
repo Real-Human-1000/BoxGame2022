@@ -114,9 +114,9 @@ public class FluidField {
     {
         int i, j, k;
         double a=dt*diff*N*N;
-        for ( k=0 ; k<10 ; k++ ) {
-            for ( i=1 ; i<N-1 ; i++ ) {
-                for ( j=1 ; j<N-1 ; j++ ) {
+        for ( k=0 ; k<20 ; k++ ) {
+            for ( i=0 ; i<N-1 ; i++ ) {
+                for ( j=0 ; j<N-1 ; j++ ) {
                     if (!walls[j][i]) {
                         double add = 0;
                         int numAdd = 0;
@@ -169,7 +169,7 @@ public class FluidField {
                                 add += x0[j - 1][i+1];
                             }
                         }
-                        x[j][i] = (x0[j][i] + a * add) / (1 + numAdd * a);
+                        x[j][i] = (x0[j][i] + a*1 * add) / (1 + numAdd * a);
                     }
                 }
             }
@@ -214,10 +214,10 @@ public class FluidField {
                 if(vx[j][i]>0)nx+=1;else nx-=1;
                 int ny=j;
                 if(vy[j][i]>0)ny+=1;else ny-=1;
-                if(israel(nx,ny)){
+                if(israel(nx,ny)&&israel(i,j)){
                     if(!walls[ny][nx]) {
                         x[ny][nx] += x0[j][i] * dt;
-                        x0[j][i] -= x0[j][i] * dt;
+                        //x0[j][i] -= x0[j][i] * dt;
                     }
                 }
                 x[j][i]+=x0[j][i];
@@ -229,8 +229,8 @@ public class FluidField {
     public void dens_step ( int N, double[][] x, double[][] x0, double[][] u, double[][] v, double diff, double dt )
     {
         swap( x0, x ); diffuse( N, 0, x, x0, diff, dt );
-        swap( x0, x ); //advect( N, 0, x, x0, u, v, dt );
-        move(x,x0,vx,vy,dt);
+        //advect( N, 0, x, x0, u, v, dt );
+        swap(x0, x); move(x,x0,vx,vy,dt);
     }
 
     public void set_bnd ( int N, int b, double[][] x )
