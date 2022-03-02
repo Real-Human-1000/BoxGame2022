@@ -19,7 +19,7 @@ public class TerrainController {
 //            }
 //        }
         updateWalls();
-        //snazzyDisplay();
+        snazzyDisplay();
     }
 
     public void worleyTerrain() {
