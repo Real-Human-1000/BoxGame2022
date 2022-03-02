@@ -212,7 +212,7 @@ public class FluidField {
                 x[j][i]=0;
                 int nx=i;
                 if(vx[j][i]>0)nx+=1;else nx-=1;
-                int ny=i;
+                int ny=j;
                 if(vy[j][i]>0)ny+=1;else ny-=1;
                 if(israel(nx,ny)){
                     if(!walls[ny][nx]) {
