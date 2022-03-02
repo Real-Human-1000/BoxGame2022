@@ -105,7 +105,7 @@ public class GridDemoFrame extends JFrame implements ActionListener
 		graphicsBox.add(new JLabel("Select Palette"));
 
 		String[] items = new String[]{"RGB Direct","Detailed (Classic)","Meat","Binary Sediment",
-		"Binary Terrain","Binary Water","Coast","Slopes"};
+		"Binary Terrain","Binary Water","Coast","Slopes","Speed"};
 		paletteSelector = new JComboBox(items);
 		paletteSelector.addActionListener(this);
 		graphicsBox.add(paletteSelector);

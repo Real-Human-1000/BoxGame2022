@@ -19,7 +19,7 @@ public class TerrainController {
 //            }
 //        }
         updateWalls();
-        snazzyDisplay();
+        // snazzyDisplay();
     }
 
     public void worleyTerrain() {
@@ -103,7 +103,7 @@ public class TerrainController {
         for (int r = 0; r < 1; r++) {
             // Set starting point of river channel and add water source
             double[] pos = {Math.random()*((double)width*0.875)+((double)width*0.0625), Math.random()*height/2};
-            ffield.addSource((int)pos[0], (int)pos[1], 0.1, 0.000, 0, 0);
+            ffield.addSource((int)pos[0], (int)pos[1], 0.1, 0, 0, 0);
 
             while (terrain[(int)pos[1]][(int)pos[0]] > seaLevel/2) {
                 if (terrain[(int)pos[1]][(int)pos[0]] > seaLevel*0.75)
@@ -155,14 +155,14 @@ public class TerrainController {
                     // dT ~ s
                     // dT ~ f
                     // dT ~ 1 - e
-                    deltaTerrain = -1 * Math.min(speed * ffield.getDensity(x, y) * (1 - ffield.getEarthDensity(x, y)) / 100, terrain[y][x]);
+                    deltaTerrain = -1 * Math.min(speed * ffield.getDensity(x, y) * (1 - ffield.getEarthDensity(x, y)), terrain[y][x]);
                 }
                 if (speed < 1) {
                     // Release
                     // dT ~ 1 - s
                     // dT ~ f
                     // dT ~ e
-                    deltaTerrain = Math.min((1 - speed) * ffield.getDensity(x, y) * ffield.getEarthDensity(x, y) / 100, ffield.getEarthDensity(x, y));
+                    deltaTerrain = Math.min((1 - speed) * ffield.getDensity(x, y) * ffield.getEarthDensity(x, y), ffield.getEarthDensity(x, y));
                 }
 
                 ffield.setEarthDensity(x, y, ffield.getEarthDensity(x, y) + deltaTerrain);
@@ -177,7 +177,6 @@ public class TerrainController {
                 if (x < width-1) { terrain[y][x+1] += deltaTerrain/numTiles; }
                 if (y > 0) { terrain[y-1][x] += deltaTerrain/numTiles; }
                 if (y < height-1) { terrain[y+1][x] += deltaTerrain/numTiles; }
-                terrain[y][x]=ffield.getEarthDensity(x,y);
 
                 // Change wall status
                 ffield.setWall(x, y, terrain[y][x] > this.seaLevel);
@@ -201,7 +200,7 @@ public class TerrainController {
         for (int i = 0; i < 1; i++) {
             ffield.step();
         }
-        // update();
+        update();
     }
 
     public double getTerrainAt(int x, int y) {
@@ -254,6 +253,10 @@ public class TerrainController {
         }
 
         return slope;
+    }
+
+    public double[] getVelocityAt(int x, int y) {
+        return new double[] {ffield.getVx(x, y), ffield.getVy(x, y)};
     }
 
     public void addSource(int x, int y, double density, double earthDensity, double vx, double vy) {
