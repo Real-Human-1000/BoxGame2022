@@ -27,6 +27,8 @@ public class Cell
 	private double millisSinceLastFlip = 0;//keeps cells from flipping too often.
 	private boolean inPerformanceMode = false;
 
+	private boolean willNeverBeBallin = false;
+
 
 
 	int lastTileStatus = 0;
@@ -81,14 +83,16 @@ public class Cell
 				if (colorChanged == false) {
 					flipManager = new CellFlipManager(this, this.color);
 					colorChanged = true;
-
-				}
+				}else{willNeverBeBallin = true;}
 				//millisSinceLastFlip = 0;
 				this.color = color;
 			}else{
 				this.color = color;
-				createDrip();
+				if(GridDemoPanel.performanceMode){
+					willNeverBeBallin = true;
+				}else{createDrip();}
 			}
+
 		}
 		//this.colorID = colorID;
 	}
@@ -168,6 +172,7 @@ public class Cell
 	public void createDrip(){
 		myDrip = myGC.createCompatibleVolatileImage(CELL_SIZE,CELL_SIZE);
 		restoreDrip();
+		willNeverBeBallin = false;
 	}
 
 	private void restoreDrip(){
@@ -242,8 +247,8 @@ public class Cell
 				//g2.fillRect(x,y,CELL_SIZE,CELL_SIZE);
 
 
-				if (performanceMode == false) {
-					//g2.drawImage(myDrip,x,y,CELL_SIZE,CELL_SIZE,null);
+				if (GridDemoPanel.performanceMode==false) {
+					if(willNeverBeBallin){createDrip();}
 					drawMyDrip(g2);
 				} else {
 					g2.fillRect(x, y, CELL_SIZE, CELL_SIZE);

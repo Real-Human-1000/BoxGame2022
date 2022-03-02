@@ -18,7 +18,7 @@ public class GridDemoPanel extends JPanel implements MouseListener, KeyListener
 	public TerrainController terrainController;
 	public int score;
 	public double deltaTime = 0;
-	public boolean performanceMode;
+	public static boolean performanceMode;
 	public static int[] flipThresholds = new int[]{50,10,10,1,1,10,10,10};
 	public static boolean forcePerformanceMode = false;
 	public static boolean doFlipAnims = true;
@@ -298,9 +298,9 @@ public class GridDemoPanel extends JPanel implements MouseListener, KeyListener
 		deltaTime = millisecondsSinceLastStep;
 
 		terrainController.stepAndUpdate();
-		performanceMode = forcePerformanceMode;
+		GridDemoPanel.performanceMode = forcePerformanceMode;
 		if (deltaTime>=12){
-			performanceMode = true;
+			GridDemoPanel.performanceMode = true;
 		}
 		repaint();
 	}
