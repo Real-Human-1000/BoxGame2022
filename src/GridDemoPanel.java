@@ -19,14 +19,14 @@ public class GridDemoPanel extends JPanel implements MouseListener, KeyListener
 	public int score;
 	public static double deltaTime = 0;
 	public static boolean performanceMode;
-	public static int[] flipThresholds = new int[]{50,10,10,1,1,10,10,10};
+	public static int[] flipThresholds = new int[]{50,10,10,1,1,10,10,10,10};
 	public static boolean forcePerformanceMode = false;
 	public static boolean doFlipAnims = true;
 	public static boolean addMode = true; //True for add water, false for sediment;
 	public static int palette = 0;
 	// 0 = direct, 1 = classic, 2 = meat,
 	// 3 = binary sediment, 4 = binary terrain, 5 = binary water
-	// 6 = coast, 7 = slope
+	// 6 = coast, 7 = slope, 8 = speed
 	
 	public GridDemoPanel(GridDemoFrame parent)
 	{
@@ -153,6 +153,14 @@ public class GridDemoPanel extends JPanel implements MouseListener, KeyListener
 				}
 
 				theGrid[r][c].drawSelf(g);
+				if (palette == 8) {
+					// Speed - shows magnitude of velocity
+					double[] vels = terrainController.getVelocityAt(c, r);
+					double speed = Math.sqrt(vels[0]*vels[0] + vels[1]*vels[1]);
+					theGrid[r][c].setColorID(new Color(capColor(speed * 512), capColor(speed * 255), 32));
+				}
+
+				theGrid[r][c].drawSelf(g);
 			}
 	}
 	
@@ -163,7 +171,9 @@ public class GridDemoPanel extends JPanel implements MouseListener, KeyListener
 	 */
 	public void userClickedCell(int row, int col)
 	{
-		System.out.println("("+col+", "+row+") --> Terrain: " + terrainMap[row][col] + ", Water: " + terrainController.getFluidAt(col, row));
+		double[] vels = terrainController.getVelocityAt(col, row);
+		System.out.println("("+col+", "+row+") --> Terrain: " + terrainMap[row][col] + ", Water: " + terrainController.getFluidAt(col, row) +
+				", VX: " + vels[0] + ", VY: " + vels[1]);
 	}
 
 	
