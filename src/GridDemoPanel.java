@@ -24,6 +24,7 @@ public class GridDemoPanel extends JPanel implements MouseListener, KeyListener
 	public static boolean doFlipAnims = true;
 	public static boolean addMode = true; //True for add water, false for sediment;
 	public static int palette = 0;
+	public static double speedMultiplier = 1.0;
 	// 0 = direct, 1 = classic, 2 = meat,
 	// 3 = binary sediment, 4 = binary terrain, 5 = binary water
 	// 6 = coast, 7 = slope, 8 = speed
@@ -216,6 +217,11 @@ public class GridDemoPanel extends JPanel implements MouseListener, KeyListener
 	public static void setDimensions(int dims){
 		GridDemoPanel.NUM_ROWS = dims;
 		GridDemoPanel.NUM_COLS = dims;
+	}
+
+	public static void setSpeedMultiplier(int inputVal) {
+
+		GridDemoPanel.speedMultiplier = ((double)inputVal)/100.0;
 	}
 
 	//============================ Mouse Listener Overrides ==========================

@@ -436,6 +436,13 @@ public class FluidField {
         return IXAVG(earthDensity, i, j);
     }
 
+    public void setDt(double dt) {
+        if(dt>1)
+            this.dt = 1;
+        else
+            this.dt = dt;
+    }
+
     //adds a source or edits a source if one already exists at given coords
     public void addSource(int x, int y, double density, double earthDensity, double vx, double vy) {
         boolean found = false;

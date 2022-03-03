@@ -196,6 +196,7 @@ public class TerrainController {
     }
 
     public void stepAndUpdate() {
+        ffield.setDt(GridDemoPanel.speedMultiplier*GridDemoPanel.deltaTime/24);
         // Steps fluid field and updates terrain
         for (int i = 0; i < 1; i++) {
             ffield.step();

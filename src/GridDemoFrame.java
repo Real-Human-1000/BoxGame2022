@@ -3,8 +3,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
-public class GridDemoFrame extends JFrame implements ActionListener
+public class GridDemoFrame extends JFrame implements ActionListener, ChangeListener
 {
 	GridDemoPanel thePanel;
 	Box uiPanel;
@@ -13,12 +15,13 @@ public class GridDemoFrame extends JFrame implements ActionListener
 	JTextField numRowsField, numColsField;
 	JToggleButton disableFlipButton, pModeButton;
 	JComboBox paletteSelector;
+	JSlider speedSlider;
 	public GridDemoFrame()
 	{
 		super("Grid Demo");
 		
-		//setSize(Cell.CELL_SIZE*GridDemoPanel.NUM_COLS,Cell.CELL_SIZE*GridDemoPanel.NUM_ROWS+80);
-		
+		setSize(Cell.CELL_SIZE*GridDemoPanel.NUM_COLS,Cell.CELL_SIZE*GridDemoPanel.NUM_ROWS+70);
+
 		this.getContentPane().setLayout(new BorderLayout());
 		thePanel = new GridDemoPanel(this);
 		scoreLabel = new JLabel("Score: 0");
@@ -35,9 +38,6 @@ public class GridDemoFrame extends JFrame implements ActionListener
 		//southPanel.add(Box.createGlue());
 		//southPanel.add(messageLabel, BorderLayout.SOUTH);
 		//southPanel.add(Box.createHorizontalStrut(10));
-
-		setSize(Cell.CELL_SIZE*GridDemoPanel.NUM_COLS,Cell.CELL_SIZE*GridDemoPanel.NUM_ROWS+100);
-		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setVisible(true);
 		thePanel.initiateAnimationLoop(); // uncomment this line if your program uses animation.
@@ -63,7 +63,7 @@ public class GridDemoFrame extends JFrame implements ActionListener
 		uiPanel.add(buildGenerationBox());
 		uiPanel.add(buildMouseModeBox());
 		uiPanel.add(buildGraphicsBox());
-		//uiPanel.add(generateDotBox());
+
 		uiPanel.add(Box.createHorizontalGlue());
 
 		return uiPanel;
@@ -89,10 +89,20 @@ public class GridDemoFrame extends JFrame implements ActionListener
 		//genBox.add(colsLabel);
 		//genBox.add(numColsField);
 
-		genBox.setBorder(BorderFactory.createTitledBorder("Generation"));
+		speedSlider = new JSlider(0,200,100);
+		speedSlider.addChangeListener(this);
+		JLabel speedLabel = new JLabel("Set Simulation Speed");
+		speedLabel.setLabelFor(speedSlider);
+		genBox.add(speedLabel);
+		genBox.add(speedSlider);
+
+
+		genBox.setBorder(BorderFactory.createTitledBorder("Generation & Simulation"));
+		//genBox.add(Box.createVerticalGlue());
 
 		return genBox;
 	}
+
 
 	private int getNewDimension(JTextField field,int fallBackValue){
 		int n;
@@ -127,6 +137,8 @@ public class GridDemoFrame extends JFrame implements ActionListener
 		return mModeBox;
 	}
 
+
+
 	private Box buildGraphicsBox(){
 		Box graphicsBox = Box.createVerticalBox();
 
@@ -149,7 +161,7 @@ public class GridDemoFrame extends JFrame implements ActionListener
 		graphicsBox.add(disableFlipButton);
 
 		graphicsBox.setBorder(BorderFactory.createTitledBorder("Graphics"));
-		graphicsBox.add(Box.createVerticalGlue());
+		//graphicsBox.add(Box.createVerticalGlue());
 
 		return graphicsBox;
 	}
@@ -164,6 +176,7 @@ public class GridDemoFrame extends JFrame implements ActionListener
 			);
 			setSize(Cell.CELL_SIZE*GridDemoPanel.NUM_COLS,
 					Cell.CELL_SIZE*GridDemoPanel.NUM_ROWS+uiPanel.getHeight());
+
 			thePanel.regenerateTerrain();
 		}
 		if (e.getSource() == addEarthButton)
@@ -177,5 +190,12 @@ public class GridDemoFrame extends JFrame implements ActionListener
 		if (e.getSource() == pModeButton)
 			GridDemoPanel.setForcePerformanceMode(pModeButton.isSelected());
 
+	}
+
+	@Override
+	public void stateChanged(ChangeEvent e) {
+		if (e.getSource() == speedSlider){
+			GridDemoPanel.setSpeedMultiplier(speedSlider.getValue());
+		}
 	}
 }
