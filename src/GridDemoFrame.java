@@ -6,6 +6,8 @@ import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+// Written mostly by Ravi Yalamanchili
+
 public class GridDemoFrame extends JFrame implements ActionListener, ChangeListener
 {
 	GridDemoPanel thePanel;

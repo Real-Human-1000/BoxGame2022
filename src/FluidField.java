@@ -2,6 +2,8 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.util.ArrayList;
 
+// Written mostly by Jack Josephson
+
 public class FluidField {
     private double[][] density;
     private double[][] vx;
@@ -23,7 +25,7 @@ public class FluidField {
     private double dt = 0.5;
     private double diff = 0.99;
     private double visc = 0.1;
-    private double diffE = 0.5;
+    private double diffE = 0.001;
     private int N;
 
     private double t;

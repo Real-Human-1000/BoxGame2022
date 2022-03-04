@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
+// Written mostly by Ravi Yalamanchili
+
 public class GridDemoPanel extends JPanel implements MouseListener, KeyListener
 {
 	private Cell[][] theGrid;
@@ -119,6 +121,7 @@ public class GridDemoPanel extends JPanel implements MouseListener, KeyListener
 								capColor(227 * Math.pow(terrainMap[r][c], 2) + 10),
 								capColor(180 * Math.pow(terrainMap[r][c], 2) + 20)));
 					}
+					// Meat
 				}
 
 				if (palette == 3) {
@@ -148,9 +151,10 @@ public class GridDemoPanel extends JPanel implements MouseListener, KeyListener
 				if (palette == 7) {
 					// Slope - shows estimated slope of tiles, either X and Y or magnitude
 					double[] slope = terrainController.getSlope(c, r);
-					// System.out.println(slope[0] + " " + slope[1]);
+					// First color option shows different dimensions of slope, second only shows magnitude
+					// Seeing both x and y is more useful, so it is enabled
 					theGrid[r][c].setColorID(new Color(capColor(slope[0]*128 + 128), capColor(slope[1]*128 + 128), 128));
-					//theGrid[r][c].setColorID(new Color(capColor(Math.sqrt(slope[0]*slope[0] + slope[1]*slope[1]) * 1024), 64, 64));
+//					theGrid[r][c].setColorID(new Color(capColor(Math.sqrt(slope[0]*slope[0] + slope[1]*slope[1]) * 1024), 64, 64));
 				}
 
 				theGrid[r][c].drawSelf(g);
@@ -159,6 +163,7 @@ public class GridDemoPanel extends JPanel implements MouseListener, KeyListener
 					double[] vels = terrainController.getVelocityAt(c, r);
 					double speed = Math.sqrt(vels[0]*vels[0] + vels[1]*vels[1]);
 					theGrid[r][c].setColorID(new Color(capColor(speed * 512), capColor(speed * 255), 32));
+//					theGrid[r][c].setColorID(new Color(16, capColor(vels[0]*255), capColor(vels[1]*255))); // Alt colors for x and y velocities separately
 				}
 
 				theGrid[r][c].drawSelf(g);

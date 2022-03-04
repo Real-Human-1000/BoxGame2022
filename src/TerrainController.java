@@ -1,9 +1,12 @@
+// Written mostly by Henry Prendergast
+
 public class TerrainController {
 
     int width, height;
     private FluidField ffield;
     private double[][] terrain;
     private double seaLevel;
+    private double aveSpeed = 0.2;
 
     public TerrainController(int w, int h) {
         this.width = w;
@@ -11,15 +14,10 @@ public class TerrainController {
         this.seaLevel = 0.3;
         this.ffield = new FluidField(h*2, w*2, this);  // Jack tells me to keep this a square
 
-        //worleyTerrain();  // For islands. Not great, but it's what we got
+        //worleyTerrain();  // For islands. Not great
         polyTerrain();  // Good for rivers
-//        for(int x=0; x<w; x++){
-//            for(int y=0; y<h; y++){
-//                ffield.setEarthDensity(x,y,terrain[y][x]);
-//            }
-//        }
-        updateWalls();
-        snazzyDisplay();
+        updateWalls(); // Loads wall array in ffield
+        // snazzyDisplay();
     }
 
     public void worleyTerrain() {
@@ -66,9 +64,9 @@ public class TerrainController {
     }
 
     public void polyTerrain() {
-        // Fills terrain with random doubles as a starting point for the simulation
+        // Fills terrain with slightly less random doubles as a starting point for the simulation
         // Uses noise generated from Voronoi polygons. Basically Worley noise again but cooler and better for our purposes
-        // Inspired by (but not taken from) http://www-cs-students.stanford.edu/~amitp/game-programming/polygon-map-generation/
+        // Not totally realistic but it looks sweet, right?
         terrain = new double[height][width];
 
         // Make a bunch of points that will define the terrain
@@ -125,7 +123,8 @@ public class TerrainController {
             }
         }
 
-        // Make a wall around the map because I don't trust Jack's code to stop fluid escaping
+        // Make a wall around the map
+        // In case you wanted to do that for some reason
 //        for (int w = 0; w < width; w++) {
 //            terrain[height-1][w] = 1;
 //            terrain[height-2][w] = 1;
@@ -136,54 +135,103 @@ public class TerrainController {
 //            terrain[w][width-1] = 1;
 //            terrain[w][width-2] = 1;
 //        }
-        // It doesn't seem to work / fluid escaping isn't the problem
     }
 
     public void update() {
         // Updates itself and the fluid field
+        double newAveSpeed = 0;
+
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 // Change terrain heights
                 double speed = Math.sqrt(Math.pow(ffield.getVx(x, y), 2) + Math.pow(ffield.getVy(x, y), 2));
-                // Min speed is 0, max speed is realistically 10, normal highest speed is 2
+                // Speed is ridiculously variable, so we'll just get the average speed each frame and use that
+
+                newAveSpeed += speed/(width*height);
 
                 // Total amount of sediment to deposit
                 double deltaTerrain = 0;
 
-                if (speed >= 1) {
+                // These formulas are very finicky and hard to get right, so I've split them apart and have tried to lay it out as simply as possible
+                if (speed >= aveSpeed) {
                     // Consume
                     // dT ~ s
                     // dT ~ f
                     // dT ~ 1 - e
-                    deltaTerrain = -1 * Math.min(speed * ffield.getDensity(x, y) * (1 - ffield.getEarthDensity(x, y)), terrain[y][x]);
+                     deltaTerrain = -1 * Math.min(speed * ffield.getDensity(x, y) * (1 - ffield.getEarthDensity(x, y)) / 100, terrain[y][x]);
+//                    deltaTerrain = -1 * Math.min((1 - ffield.getEarthDensity(x, y)) * speed  / 1000, terrain[y][x]);
                 }
-                if (speed < 1) {
+                if (speed < aveSpeed) {
                     // Release
                     // dT ~ 1 - s
                     // dT ~ f
                     // dT ~ e
-                    deltaTerrain = Math.min((1 - speed) * ffield.getDensity(x, y) * ffield.getEarthDensity(x, y), ffield.getEarthDensity(x, y));
+                     deltaTerrain = Math.min((1 - speed) * ffield.getDensity(x, y) * ffield.getEarthDensity(x, y) / 100, ffield.getEarthDensity(x, y));
+//                    deltaTerrain = Math.min(ffield.getEarthDensity(x, y) * (1 - speed) / 1000, ffield.getEarthDensity(x, y));
                 }
 
-                ffield.setEarthDensity(x, y, ffield.getEarthDensity(x, y) + deltaTerrain);
+                ffield.setEarthDensity(x, y, ffield.getEarthDensity(x, y) - deltaTerrain);
 
-                // Split up sediment among neighboring tiles
-                int numTiles = 5;
-                if (x == 0 || x == width - 1) { numTiles -= 1; } // Left or right side
-                if (y == 0 || y == height - 1) { numTiles -= 1; } // Top or bottom
+                // Split up sediment among directly neighboring tiles
+                // The old version (in comments) only did this with directly neighboring cells,
+                // But the new version *should* take into account the diagonal cells
+                // This has to be done because water can flow into the diagonals
+                int numTiles = 0;
+//                if (x == 0 || x == width - 1) { numTiles -= 1; } // Left or right side
+//                if (y == 0 || y == height - 1) { numTiles -= 1; } // Top or bottom
+//
+//                terrain[y][x] += deltaTerrain/numTiles;
+//                if (x > 0) { terrain[y][x-1] += deltaTerrain/numTiles; }
+//                if (x < width-1) { terrain[y][x+1] += deltaTerrain/numTiles; }
+//                if (y > 0) { terrain[y-1][x] += deltaTerrain/numTiles; }
+//                if (y < height-1) { terrain[y+1][x] += deltaTerrain/numTiles; }
 
-                terrain[y][x] += deltaTerrain/numTiles;
-                if (x > 0) { terrain[y][x-1] += deltaTerrain/numTiles; }
-                if (x < width-1) { terrain[y][x+1] += deltaTerrain/numTiles; }
-                if (y > 0) { terrain[y-1][x] += deltaTerrain/numTiles; }
-                if (y < height-1) { terrain[y+1][x] += deltaTerrain/numTiles; }
+                // We'll store valid locations to deposit to in this 3x3 2D array
+                boolean[][] valids = new boolean[3][3];
+
+                for (int j = -1; j < 2; j++) {
+                    for (int i = -1; i < 2; i++) {
+                        boolean valid = true;
+                        if (x + i < 0 || x + i > width-1)
+                            valid = false;
+                        if (y + j < 0 || y + j > height-1)
+                            valid = false;
+                        if (valid && terrain[y+j][x+i] >= 1)
+                            valid = false;
+                        if (valid) {
+                            numTiles++;
+                            valids[j+1][i+1] = true;
+                        }
+                    }
+                }
+
+                if (numTiles > 0) {
+                    terrain[y][x] -= deltaTerrain;
+
+                    for (int j = -1; j < 2; j++) {
+                        for (int i = -1; i < 2; i++) {
+                            if (valids[j+1][i+1]) {
+                                // Add a bit of deltaTerrain
+                                terrain[y + j][x + i] += deltaTerrain / numTiles;
+//                                terrain[y + j][x + i] = Math.max(0, Math.min(terrain[y + j][x + i], 1));
+                            }
+                        }
+                    }
+                }
 
                 // Change wall status
                 ffield.setWall(x, y, terrain[y][x] > this.seaLevel);
-//                ffield.setVx(x, y, ffield.getVx(x, y) - Math.min(terrain[y][x]*2,1) * ffield.getVx(x, y));
-//                ffield.setVy(x, y, ffield.getVy(x, y) - Math.min(terrain[y][x]*2,1) * ffield.getVy(x, y));
+                // Erase water if it became land
+                if (terrain[y][x] > this.seaLevel) {
+                    ffield.setDensity(x, y, 0);
+                    ffield.setEarthDensity(x, y, 0);
+                }
+                // Just make double-sure that the terrain is between 0 and 1
+                terrain[y][x] = Math.max(0, Math.min(terrain[y][x], 1));
             }
         }
+
+        aveSpeed = newAveSpeed;
     }
 
     public void updateWalls() {
@@ -191,6 +239,10 @@ public class TerrainController {
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 ffield.setWall(x, y, terrain[y][x] > this.seaLevel);
+                if (terrain[y][x] > this.seaLevel) {
+                    ffield.setDensity(x, y, 0);
+                    ffield.setEarthDensity(x, y, 0);
+                }
             }
         }
     }
@@ -198,9 +250,7 @@ public class TerrainController {
     public void stepAndUpdate() {
         ffield.setDt(GridDemoPanel.speedMultiplier*GridDemoPanel.deltaTime/24);
         // Steps fluid field and updates terrain
-        for (int i = 0; i < 1; i++) {
-            ffield.step();
-        }
+        ffield.step();
         update();
     }
 
@@ -257,11 +307,12 @@ public class TerrainController {
     }
 
     public double[] getVelocityAt(int x, int y) {
+        // Return the velocity of fluid at a certain position in the form of an array with x-axis velocity and y-axis velocity
         return new double[] {ffield.getVx(x, y), ffield.getVy(x, y)};
     }
 
     public void addSource(int x, int y, double density, double earthDensity, double vx, double vy) {
-        // Add water source
+        // Add a water source at a location. Originally the player was going to be able to do this, but the simulation is already unstable enough as it is :/
         ffield.addSource(x, y, density, earthDensity, vx, vy);
     }
 
@@ -271,7 +322,7 @@ public class TerrainController {
     }
 
     public void addWater(int x, int y, double amount) {
-        // Add some water -- I would not recommend using this, but whatevs
+        // Add some water -- I would not recommend using this
         ffield.setDensity(x, y, Math.max(0, Math.min(ffield.getDensity(x, y) + amount, 1)));
     }
 
