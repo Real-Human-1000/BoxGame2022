@@ -22,7 +22,7 @@ public class GridDemoPanel extends JPanel implements MouseListener, KeyListener
 	public static int[] flipThresholds = new int[]{50,10,10,1,1,10,10,10,10};
 	public static boolean forcePerformanceMode = false;
 	public static boolean doFlipAnims = true;
-	public static boolean addMode = true; //True for add water, false for sediment;
+	public static int addMode = 4; //0 add water, 1 for sediment,2 for source;//4 for debug
 	public static int palette = 0;
 	public static double speedMultiplier = 1.0;
 	// 0 = direct, 1 = classic, 2 = meat,
@@ -175,6 +175,13 @@ public class GridDemoPanel extends JPanel implements MouseListener, KeyListener
 		double[] vels = terrainController.getVelocityAt(col, row);
 		System.out.println("("+col+", "+row+") --> Terrain: " + terrainMap[row][col] + ", Water: " + terrainController.getFluidAt(col, row) +
 				", VX: " + vels[0] + ", VY: " + vels[1]);
+
+		if (addMode==0){
+			terrainController.addWater(col,row,0.1);
+		}else if(addMode ==1)
+			terrainController.addTerrain(col,row,terrainController.getSeaLevel());
+		else if (addMode==2)
+			terrainController.addSource(col,row,1,1,1,1);
 	}
 
 	
@@ -201,7 +208,7 @@ public class GridDemoPanel extends JPanel implements MouseListener, KeyListener
 		GridDemoPanel.doFlipAnims = doFlipAnims;
 	}
 
-	public static void setAddMode(boolean addMode) {
+	public static void setAddMode(int addMode) {
 		GridDemoPanel.addMode = addMode;
 	}
 

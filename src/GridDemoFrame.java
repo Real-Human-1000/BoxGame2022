@@ -11,7 +11,7 @@ public class GridDemoFrame extends JFrame implements ActionListener, ChangeListe
 	GridDemoPanel thePanel;
 	Box uiPanel;
 	JLabel scoreLabel, messageLabel;
-	JButton regenerateButton, addEarthButton, addWaterButton;
+	JButton regenerateButton, addEarthButton, addWaterButton,addSourceButton;
 	JTextField numRowsField, numColsField;
 	JToggleButton disableFlipButton, pModeButton;
 	JComboBox paletteSelector;
@@ -61,7 +61,7 @@ public class GridDemoFrame extends JFrame implements ActionListener, ChangeListe
 		uiPanel.setAlignmentX(Box.LEFT_ALIGNMENT);
 
 		uiPanel.add(buildGenerationBox());
-		uiPanel.add(buildMouseModeBox());
+		//uiPanel.add(buildMouseModeBox()); Mouse modes did not work
 		uiPanel.add(buildGraphicsBox());
 
 		uiPanel.add(Box.createHorizontalGlue());
@@ -119,17 +119,21 @@ public class GridDemoFrame extends JFrame implements ActionListener, ChangeListe
 
 		addEarthButton = new JButton("Add Earth");
 		addWaterButton = new JButton("Add Water");
+		addSourceButton = new JButton("Add Water Source");
 		ButtonGroup bg = new ButtonGroup();
 		addWaterButton.setSelected(true);
 
 		bg.add(addEarthButton);
 		bg.add(addWaterButton);
+		bg.add(addSourceButton);
 
 		mModeBox.add(addEarthButton);
 		mModeBox.add(addWaterButton);
+		mModeBox.add(addSourceButton);
 
 		addEarthButton.addActionListener(this);
 		addWaterButton.addActionListener(this);
+		addSourceButton.addActionListener(this);
 
 		mModeBox.setBorder(BorderFactory.createTitledBorder("Mouse Mode"));
 		mModeBox.add(Box.createVerticalGlue());
@@ -179,10 +183,24 @@ public class GridDemoFrame extends JFrame implements ActionListener, ChangeListe
 
 			thePanel.regenerateTerrain();
 		}
-		if (e.getSource() == addEarthButton)
-			GridDemoPanel.setAddMode(false);
-		if (e.getSource() == addWaterButton)
-			GridDemoPanel.setAddMode(true);
+		if (e.getSource() == addEarthButton) {
+			GridDemoPanel.setAddMode(1);
+			addEarthButton.setSelected(true);
+			addSourceButton.setSelected(false);
+			addWaterButton.setSelected(false);
+		}
+		if (e.getSource() == addWaterButton) {
+			GridDemoPanel.setAddMode(1);
+			addWaterButton.setSelected(true);
+			addSourceButton.setSelected(false);
+			addEarthButton.setSelected(false);
+		}
+		if (e.getSource() == addSourceButton) {
+			GridDemoPanel.setAddMode(2);
+			addSourceButton.setSelected(true);
+			addWaterButton.setSelected(false);
+			addEarthButton.setSelected(false);
+		}
 		if (e.getSource() == paletteSelector)
 			GridDemoPanel.setPalette(paletteSelector.getSelectedIndex());
 		if (e.getSource() == disableFlipButton)
